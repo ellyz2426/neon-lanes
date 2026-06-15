@@ -1,26 +1,30 @@
-<container flexDirection="column" alignItems="center" gap="10" padding="16">
-  <text name="result-title" fontSize="36" fontWeight="bold" color="#00ffff">GAME OVER</text>
+<container flexDirection="column" alignItems="center" gap="8" padding="16">
   <text name="result-rating" fontSize="48" fontWeight="bold" color="#ffff00"> </text>
   <container flexDirection="column" gap="4" alignItems="center">
-    <text name="final-score" fontSize="28" fontWeight="bold" color="#ffffff">Score: 0</text>
+    <text name="final-score" fontSize="32" fontWeight="bold" color="#ffffff">Score: 0</text>
     <text name="high-score" fontSize="16" color="#ff8800">Best: 0</text>
-    <container flexDirection="row" gap="16">
-      <container flexDirection="column" alignItems="center">
-        <text name="strikes-count" fontSize="20" color="#ff00ff">0</text>
-        <text fontSize="12" color="#888888">Strikes</text>
-      </container>
-      <container flexDirection="column" alignItems="center">
-        <text name="spares-count" fontSize="20" color="#00ff88">0</text>
-        <text fontSize="12" color="#888888">Spares</text>
-      </container>
-      <container flexDirection="column" alignItems="center">
-        <text name="gutters-count" fontSize="20" color="#ff4444">0</text>
-        <text fontSize="12" color="#888888">Gutters</text>
-      </container>
-    </container>
-    <text name="throws-count" fontSize="14" color="#888888">Throws: 0</text>
-    <text name="avg-pins" fontSize="14" color="#888888">Avg: 0.0 pins/throw</text>
+    <text name="new-best" fontSize="14" fontWeight="bold" color="#ffcc00"> </text>
   </container>
+  <container flexDirection="row" gap="20">
+    <container flexDirection="column" alignItems="center">
+      <text name="strikes-count" fontSize="22" fontWeight="bold" color="#ff00ff">0</text>
+      <text fontSize="11" color="#888888">Strikes</text>
+    </container>
+    <container flexDirection="column" alignItems="center">
+      <text name="spares-count" fontSize="22" fontWeight="bold" color="#00ff88">0</text>
+      <text fontSize="11" color="#888888">Spares</text>
+    </container>
+    <container flexDirection="column" alignItems="center">
+      <text name="gutters-count" fontSize="22" fontWeight="bold" color="#ff4444">0</text>
+      <text fontSize="11" color="#888888">Gutters</text>
+    </container>
+  </container>
+  <container flexDirection="row" gap="12">
+    <text name="throws-count" fontSize="12" color="#666666">Throws: 0</text>
+    <text name="avg-pins" fontSize="12" color="#666666">Avg: 0.0</text>
+    <text name="streak-display" fontSize="12" color="#666666">Best Run: 0</text>
+  </container>
+  <text name="xp-gained" fontSize="14" color="#ffcc00"> </text>
   <container flexDirection="row" gap="12">
     <text name="btn-rematch" fontSize="20" fontWeight="bold" color="#00ffff" backgroundColor="#003344" padding="10" borderRadius="4">REMATCH</text>
     <text name="btn-menu" fontSize="20" color="#888888" backgroundColor="#222222" padding="10" borderRadius="4">MENU</text>

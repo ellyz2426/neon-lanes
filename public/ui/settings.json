@@ -309,13 +309,13 @@
                     "sourceTag": "text",
                     "type": "custom",
                     "children": [
-                      "Neon Holodeck"
+                      "Neon Blue"
                     ],
                     "properties": {
                       "name": "theme-name",
                       "fontsize": "14",
                       "color": "#ffffff",
-                      "width": "100",
+                      "width": "90",
                       "textalign": "center"
                     },
                     "dataUid": "uid-26"
@@ -353,6 +353,48 @@
             "dataUid": "uid-22"
           },
           {
+            "sourceTag": "container",
+            "type": "custom",
+            "children": [
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "Gutter Bumpers"
+                ],
+                "properties": {
+                  "fontsize": "14",
+                  "color": "#888888"
+                },
+                "dataUid": "uid-29"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "OFF"
+                ],
+                "properties": {
+                  "name": "btn-bumpers",
+                  "fontsize": "14",
+                  "color": "#00cccc",
+                  "backgroundcolor": "#003333",
+                  "padding": "4",
+                  "borderradius": "2",
+                  "width": "50",
+                  "textalign": "center"
+                },
+                "dataUid": "uid-30"
+              }
+            ],
+            "properties": {
+              "flexdirection": "row",
+              "justifycontent": "space-between",
+              "alignitems": "center"
+            },
+            "dataUid": "uid-28"
+          },
+          {
             "sourceTag": "text",
             "type": "custom",
             "children": [
@@ -367,13 +409,13 @@
               "borderradius": "4",
               "textalign": "center"
             },
-            "dataUid": "uid-28"
+            "dataUid": "uid-31"
           }
         ],
         "properties": {
           "flexdirection": "column",
           "gap": "6",
-          "width": "280"
+          "width": "300"
         },
         "dataUid": "uid-3"
       },
@@ -393,7 +435,7 @@
           "width": "120",
           "textalign": "center"
         },
-        "dataUid": "uid-29"
+        "dataUid": "uid-32"
       }
     ],
     "properties": {
@@ -412,7 +454,7 @@
         "column": 0
       },
       "end": {
-        "line": 38,
+        "line": 42,
         "column": 12
       }
     },
@@ -432,7 +474,7 @@
         "column": 2
       },
       "end": {
-        "line": 36,
+        "line": 40,
         "column": 14
       }
     },
@@ -663,7 +705,7 @@
       },
       "end": {
         "line": 31,
-        "column": 113
+        "column": 108
       }
     },
     "uid-27": {
@@ -682,17 +724,47 @@
         "column": 4
       },
       "end": {
-        "line": 35,
-        "column": 162
+        "line": 38,
+        "column": 16
       }
     },
     "uid-29": {
       "start": {
+        "line": 36,
+        "column": 6
+      },
+      "end": {
+        "line": 36,
+        "column": 63
+      }
+    },
+    "uid-30": {
+      "start": {
         "line": 37,
-        "column": 2
+        "column": 6
       },
       "end": {
         "line": 37,
+        "column": 156
+      }
+    },
+    "uid-31": {
+      "start": {
+        "line": 39,
+        "column": 4
+      },
+      "end": {
+        "line": 39,
+        "column": 162
+      }
+    },
+    "uid-32": {
+      "start": {
+        "line": 41,
+        "column": 2
+      },
+      "end": {
+        "line": 41,
         "column": 151
       }
     }

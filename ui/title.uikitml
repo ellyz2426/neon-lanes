@@ -1,15 +1,24 @@
-<container flexDirection="column" alignItems="center" gap="12" padding="16">
+<container flexDirection="column" alignItems="center" gap="10" padding="16">
   <text name="game-title" fontSize="48" fontWeight="bold" color="#00ffff">NEON LANES</text>
-  <text name="subtitle" fontSize="18" color="#66aaaa">HOLODECK BOWLING</text>
-  <text name="level-display" fontSize="14" color="#448888">Level 1 - Rookie</text>
-  <container flexDirection="column" gap="8" alignItems="center" width="260">
-    <text name="btn-play" fontSize="22" fontWeight="bold" color="#00ffff" backgroundColor="#003344" padding="10" borderRadius="4" width="240" textAlign="center">PLAY</text>
-    <text name="btn-scores" fontSize="18" color="#00cccc" backgroundColor="#002233" padding="8" borderRadius="4" width="240" textAlign="center">SCORES</text>
-    <text name="btn-achievements" fontSize="18" color="#00cccc" backgroundColor="#002233" padding="8" borderRadius="4" width="240" textAlign="center">ACHIEVEMENTS</text>
-    <text name="btn-stats" fontSize="18" color="#00cccc" backgroundColor="#002233" padding="8" borderRadius="4" width="240" textAlign="center">STATS</text>
-    <text name="btn-balls" fontSize="18" color="#ff8800" backgroundColor="#332200" padding="8" borderRadius="4" width="240" textAlign="center">BALL SKINS</text>
-    <text name="btn-settings" fontSize="18" color="#00cccc" backgroundColor="#002233" padding="8" borderRadius="4" width="240" textAlign="center">SETTINGS</text>
-    <text name="btn-help" fontSize="18" color="#00cccc" backgroundColor="#002233" padding="8" borderRadius="4" width="240" textAlign="center">HELP</text>
+  <text name="subtitle" fontSize="16" color="#66aaaa">HOLODECK BOWLING</text>
+  <container flexDirection="row" gap="12" alignItems="center">
+    <text name="level-display" fontSize="13" color="#448888">Level 1 - Rookie</text>
+    <text name="best-score" fontSize="13" color="#446666">Best: 0</text>
   </container>
-  <text name="best-score" fontSize="12" color="#446666">Best: 0</text>
+  <container flexDirection="column" gap="6" alignItems="center" width="260">
+    <text name="btn-play" fontSize="22" fontWeight="bold" color="#00ffff" backgroundColor="#003344" padding="10" borderRadius="4" width="240" textAlign="center">PLAY</text>
+    <container flexDirection="row" gap="6">
+      <text name="btn-scores" fontSize="15" color="#00cccc" backgroundColor="#002233" padding="7" borderRadius="4" width="115" textAlign="center">SCORES</text>
+      <text name="btn-achievements" fontSize="15" color="#00cccc" backgroundColor="#002233" padding="7" borderRadius="4" width="115" textAlign="center">TROPHIES</text>
+    </container>
+    <container flexDirection="row" gap="6">
+      <text name="btn-stats" fontSize="15" color="#00cccc" backgroundColor="#002233" padding="7" borderRadius="4" width="115" textAlign="center">STATS</text>
+      <text name="btn-balls" fontSize="15" color="#ff8800" backgroundColor="#332200" padding="7" borderRadius="4" width="115" textAlign="center">BALLS</text>
+    </container>
+    <container flexDirection="row" gap="6">
+      <text name="btn-settings" fontSize="15" color="#00cccc" backgroundColor="#002233" padding="7" borderRadius="4" width="115" textAlign="center">SETTINGS</text>
+      <text name="btn-help" fontSize="15" color="#00cccc" backgroundColor="#002233" padding="7" borderRadius="4" width="115" textAlign="center">HELP</text>
+    </container>
+  </container>
+  <text name="games-played" fontSize="10" color="#334444">Games: 0</text>
 </container>

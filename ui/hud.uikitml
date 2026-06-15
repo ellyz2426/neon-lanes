@@ -8,8 +8,11 @@
     <text name="score-label" fontSize="32" fontWeight="bold" color="#00ffff">0</text>
     <container flexDirection="column" alignItems="center">
       <text name="pins-label" fontSize="16" color="#ff8800">10 pins</text>
-      <text name="combo-label" fontSize="12" color="#ff00ff"> </text>
+      <text name="combo-label" fontSize="14" fontWeight="bold" color="#ff00ff"> </text>
     </container>
   </container>
-  <text name="time-label" fontSize="14" color="#ffff00"> </text>
+  <container flexDirection="row" gap="8" alignItems="center">
+    <text name="time-label" fontSize="14" color="#ffff00"> </text>
+    <text name="xp-label" fontSize="10" color="#666666"> </text>
+  </container>
 </container>

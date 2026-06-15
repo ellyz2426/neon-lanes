@@ -1,14 +1,18 @@
-<container flexDirection="column" alignItems="center" gap="4" padding="6">
-  <text name="power-label" fontSize="14" color="#ff8800">Power</text>
-  <text name="power-bar" fontSize="16" color="#ff8800" fontWeight="bold">----------</text>
-  <container flexDirection="row" gap="12">
-    <container flexDirection="column" alignItems="center">
-      <text fontSize="10" color="#888888">Aim</text>
-      <text name="aim-value" fontSize="14" color="#00ffff">Center</text>
+<container flexDirection="column" alignItems="center" gap="3" padding="6">
+  <container flexDirection="row" gap="6" alignItems="center">
+    <text fontSize="11" color="#888888">PWR</text>
+    <text name="power-bar" fontSize="14" color="#ff8800" fontWeight="bold">----------</text>
+    <text name="power-pct" fontSize="11" color="#ff8800">0%</text>
+  </container>
+  <container flexDirection="row" gap="16">
+    <container flexDirection="row" gap="4" alignItems="center">
+      <text fontSize="10" color="#666666">AIM</text>
+      <text name="aim-value" fontSize="13" color="#00ffff">Center</text>
     </container>
-    <container flexDirection="column" alignItems="center">
-      <text fontSize="10" color="#888888">Spin</text>
-      <text name="spin-value" fontSize="14" color="#ff00ff">None</text>
+    <container flexDirection="row" gap="4" alignItems="center">
+      <text fontSize="10" color="#666666">SPIN</text>
+      <text name="spin-value" fontSize="13" color="#ff00ff">None</text>
     </container>
   </container>
+  <text name="instruction" fontSize="10" color="#444444">SPACE to charge | Release to throw</text>
 </container>

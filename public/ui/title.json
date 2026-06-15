@@ -25,21 +25,46 @@
         ],
         "properties": {
           "name": "subtitle",
-          "fontsize": "18",
+          "fontsize": "16",
           "color": "#66aaaa"
         },
         "dataUid": "uid-3"
       },
       {
-        "sourceTag": "text",
+        "sourceTag": "container",
         "type": "custom",
         "children": [
-          "Level 1 - Rookie"
+          {
+            "sourceTag": "text",
+            "type": "custom",
+            "children": [
+              "Level 1 - Rookie"
+            ],
+            "properties": {
+              "name": "level-display",
+              "fontsize": "13",
+              "color": "#448888"
+            },
+            "dataUid": "uid-5"
+          },
+          {
+            "sourceTag": "text",
+            "type": "custom",
+            "children": [
+              "Best: 0"
+            ],
+            "properties": {
+              "name": "best-score",
+              "fontsize": "13",
+              "color": "#446666"
+            },
+            "dataUid": "uid-6"
+          }
         ],
         "properties": {
-          "name": "level-display",
-          "fontsize": "14",
-          "color": "#448888"
+          "flexdirection": "row",
+          "gap": "12",
+          "alignitems": "center"
         },
         "dataUid": "uid-4"
       },
@@ -64,143 +89,176 @@
               "width": "240",
               "textalign": "center"
             },
-            "dataUid": "uid-6"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "SCORES"
-            ],
-            "properties": {
-              "name": "btn-scores",
-              "fontsize": "18",
-              "color": "#00cccc",
-              "backgroundcolor": "#002233",
-              "padding": "8",
-              "borderradius": "4",
-              "width": "240",
-              "textalign": "center"
-            },
-            "dataUid": "uid-7"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "ACHIEVEMENTS"
-            ],
-            "properties": {
-              "name": "btn-achievements",
-              "fontsize": "18",
-              "color": "#00cccc",
-              "backgroundcolor": "#002233",
-              "padding": "8",
-              "borderradius": "4",
-              "width": "240",
-              "textalign": "center"
-            },
             "dataUid": "uid-8"
           },
           {
-            "sourceTag": "text",
+            "sourceTag": "container",
             "type": "custom",
             "children": [
-              "STATS"
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "SCORES"
+                ],
+                "properties": {
+                  "name": "btn-scores",
+                  "fontsize": "15",
+                  "color": "#00cccc",
+                  "backgroundcolor": "#002233",
+                  "padding": "7",
+                  "borderradius": "4",
+                  "width": "115",
+                  "textalign": "center"
+                },
+                "dataUid": "uid-10"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "TROPHIES"
+                ],
+                "properties": {
+                  "name": "btn-achievements",
+                  "fontsize": "15",
+                  "color": "#00cccc",
+                  "backgroundcolor": "#002233",
+                  "padding": "7",
+                  "borderradius": "4",
+                  "width": "115",
+                  "textalign": "center"
+                },
+                "dataUid": "uid-11"
+              }
             ],
             "properties": {
-              "name": "btn-stats",
-              "fontsize": "18",
-              "color": "#00cccc",
-              "backgroundcolor": "#002233",
-              "padding": "8",
-              "borderradius": "4",
-              "width": "240",
-              "textalign": "center"
+              "flexdirection": "row",
+              "gap": "6"
             },
             "dataUid": "uid-9"
           },
           {
-            "sourceTag": "text",
+            "sourceTag": "container",
             "type": "custom",
             "children": [
-              "BALL SKINS"
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "STATS"
+                ],
+                "properties": {
+                  "name": "btn-stats",
+                  "fontsize": "15",
+                  "color": "#00cccc",
+                  "backgroundcolor": "#002233",
+                  "padding": "7",
+                  "borderradius": "4",
+                  "width": "115",
+                  "textalign": "center"
+                },
+                "dataUid": "uid-13"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "BALLS"
+                ],
+                "properties": {
+                  "name": "btn-balls",
+                  "fontsize": "15",
+                  "color": "#ff8800",
+                  "backgroundcolor": "#332200",
+                  "padding": "7",
+                  "borderradius": "4",
+                  "width": "115",
+                  "textalign": "center"
+                },
+                "dataUid": "uid-14"
+              }
             ],
             "properties": {
-              "name": "btn-balls",
-              "fontsize": "18",
-              "color": "#ff8800",
-              "backgroundcolor": "#332200",
-              "padding": "8",
-              "borderradius": "4",
-              "width": "240",
-              "textalign": "center"
-            },
-            "dataUid": "uid-10"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "SETTINGS"
-            ],
-            "properties": {
-              "name": "btn-settings",
-              "fontsize": "18",
-              "color": "#00cccc",
-              "backgroundcolor": "#002233",
-              "padding": "8",
-              "borderradius": "4",
-              "width": "240",
-              "textalign": "center"
-            },
-            "dataUid": "uid-11"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "HELP"
-            ],
-            "properties": {
-              "name": "btn-help",
-              "fontsize": "18",
-              "color": "#00cccc",
-              "backgroundcolor": "#002233",
-              "padding": "8",
-              "borderradius": "4",
-              "width": "240",
-              "textalign": "center"
+              "flexdirection": "row",
+              "gap": "6"
             },
             "dataUid": "uid-12"
+          },
+          {
+            "sourceTag": "container",
+            "type": "custom",
+            "children": [
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "SETTINGS"
+                ],
+                "properties": {
+                  "name": "btn-settings",
+                  "fontsize": "15",
+                  "color": "#00cccc",
+                  "backgroundcolor": "#002233",
+                  "padding": "7",
+                  "borderradius": "4",
+                  "width": "115",
+                  "textalign": "center"
+                },
+                "dataUid": "uid-16"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "HELP"
+                ],
+                "properties": {
+                  "name": "btn-help",
+                  "fontsize": "15",
+                  "color": "#00cccc",
+                  "backgroundcolor": "#002233",
+                  "padding": "7",
+                  "borderradius": "4",
+                  "width": "115",
+                  "textalign": "center"
+                },
+                "dataUid": "uid-17"
+              }
+            ],
+            "properties": {
+              "flexdirection": "row",
+              "gap": "6"
+            },
+            "dataUid": "uid-15"
           }
         ],
         "properties": {
           "flexdirection": "column",
-          "gap": "8",
+          "gap": "6",
           "alignitems": "center",
           "width": "260"
         },
-        "dataUid": "uid-5"
+        "dataUid": "uid-7"
       },
       {
         "sourceTag": "text",
         "type": "custom",
         "children": [
-          "Best: 0"
+          "Games: 0"
         ],
         "properties": {
-          "name": "best-score",
-          "fontsize": "12",
-          "color": "#446666"
+          "name": "games-played",
+          "fontsize": "10",
+          "color": "#334444"
         },
-        "dataUid": "uid-13"
+        "dataUid": "uid-18"
       }
     ],
     "properties": {
       "flexdirection": "column",
       "alignitems": "center",
-      "gap": "12",
+      "gap": "10",
       "padding": "16"
     },
     "dataUid": "uid-1"
@@ -213,7 +271,7 @@
         "column": 0
       },
       "end": {
-        "line": 14,
+        "line": 23,
         "column": 12
       }
     },
@@ -243,18 +301,18 @@
         "column": 2
       },
       "end": {
-        "line": 3,
-        "column": 82
+        "line": 6,
+        "column": 14
       }
     },
     "uid-5": {
       "start": {
         "line": 4,
-        "column": 2
+        "column": 4
       },
       "end": {
-        "line": 12,
-        "column": 14
+        "line": 4,
+        "column": 84
       }
     },
     "uid-6": {
@@ -264,77 +322,127 @@
       },
       "end": {
         "line": 5,
-        "column": 172
+        "column": 72
       }
     },
     "uid-7": {
       "start": {
-        "line": 6,
-        "column": 4
+        "line": 7,
+        "column": 2
       },
       "end": {
-        "line": 6,
-        "column": 157
+        "line": 21,
+        "column": 14
       }
     },
     "uid-8": {
       "start": {
-        "line": 7,
+        "line": 8,
         "column": 4
       },
       "end": {
-        "line": 7,
-        "column": 169
+        "line": 8,
+        "column": 172
       }
     },
     "uid-9": {
       "start": {
-        "line": 8,
+        "line": 9,
         "column": 4
       },
       "end": {
-        "line": 8,
-        "column": 155
+        "line": 12,
+        "column": 16
       }
     },
     "uid-10": {
       "start": {
-        "line": 9,
-        "column": 4
+        "line": 10,
+        "column": 6
       },
       "end": {
-        "line": 9,
-        "column": 160
+        "line": 10,
+        "column": 159
       }
     },
     "uid-11": {
       "start": {
-        "line": 10,
-        "column": 4
+        "line": 11,
+        "column": 6
       },
       "end": {
-        "line": 10,
-        "column": 161
+        "line": 11,
+        "column": 167
       }
     },
     "uid-12": {
       "start": {
-        "line": 11,
+        "line": 13,
         "column": 4
       },
       "end": {
-        "line": 11,
-        "column": 153
+        "line": 16,
+        "column": 16
       }
     },
     "uid-13": {
       "start": {
-        "line": 13,
+        "line": 14,
+        "column": 6
+      },
+      "end": {
+        "line": 14,
+        "column": 157
+      }
+    },
+    "uid-14": {
+      "start": {
+        "line": 15,
+        "column": 6
+      },
+      "end": {
+        "line": 15,
+        "column": 157
+      }
+    },
+    "uid-15": {
+      "start": {
+        "line": 17,
+        "column": 4
+      },
+      "end": {
+        "line": 20,
+        "column": 16
+      }
+    },
+    "uid-16": {
+      "start": {
+        "line": 18,
+        "column": 6
+      },
+      "end": {
+        "line": 18,
+        "column": 163
+      }
+    },
+    "uid-17": {
+      "start": {
+        "line": 19,
+        "column": 6
+      },
+      "end": {
+        "line": 19,
+        "column": 155
+      }
+    },
+    "uid-18": {
+      "start": {
+        "line": 22,
         "column": 2
       },
       "end": {
-        "line": 13,
-        "column": 70
+        "line": 22,
+        "column": 73
       }
     }
   }
