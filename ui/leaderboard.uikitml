@@ -1,0 +1,22 @@
+<container flexDirection="column" alignItems="center" gap="8" padding="12">
+  <text fontSize="24" fontWeight="bold" color="#00ffff">HIGH SCORES</text>
+  <container flexDirection="column" gap="3" width="300">
+    <container flexDirection="row" gap="8">
+      <text fontSize="12" color="#888888" width="30">#</text>
+      <text fontSize="12" color="#888888" width="80">Score</text>
+      <text fontSize="12" color="#888888" width="80">Mode</text>
+      <text fontSize="12" color="#888888" width="80">Date</text>
+    </container>
+    <container flexDirection="row" gap="8"><text name="r1-rank" fontSize="12" color="#ffff00" width="30">1</text><text name="r1-score" fontSize="12" color="#ffffff" width="80">---</text><text name="r1-mode" fontSize="12" color="#00cccc" width="80">---</text><text name="r1-date" fontSize="12" color="#888888" width="80">---</text></container>
+    <container flexDirection="row" gap="8"><text name="r2-rank" fontSize="12" color="#cccccc" width="30">2</text><text name="r2-score" fontSize="12" color="#ffffff" width="80">---</text><text name="r2-mode" fontSize="12" color="#00cccc" width="80">---</text><text name="r2-date" fontSize="12" color="#888888" width="80">---</text></container>
+    <container flexDirection="row" gap="8"><text name="r3-rank" fontSize="12" color="#cc8844" width="30">3</text><text name="r3-score" fontSize="12" color="#ffffff" width="80">---</text><text name="r3-mode" fontSize="12" color="#00cccc" width="80">---</text><text name="r3-date" fontSize="12" color="#888888" width="80">---</text></container>
+    <container flexDirection="row" gap="8"><text name="r4-rank" fontSize="12" color="#888888" width="30">4</text><text name="r4-score" fontSize="12" color="#ffffff" width="80">---</text><text name="r4-mode" fontSize="12" color="#00cccc" width="80">---</text><text name="r4-date" fontSize="12" color="#888888" width="80">---</text></container>
+    <container flexDirection="row" gap="8"><text name="r5-rank" fontSize="12" color="#888888" width="30">5</text><text name="r5-score" fontSize="12" color="#ffffff" width="80">---</text><text name="r5-mode" fontSize="12" color="#00cccc" width="80">---</text><text name="r5-date" fontSize="12" color="#888888" width="80">---</text></container>
+    <container flexDirection="row" gap="8"><text name="r6-rank" fontSize="12" color="#888888" width="30">6</text><text name="r6-score" fontSize="12" color="#ffffff" width="80">---</text><text name="r6-mode" fontSize="12" color="#00cccc" width="80">---</text><text name="r6-date" fontSize="12" color="#888888" width="80">---</text></container>
+    <container flexDirection="row" gap="8"><text name="r7-rank" fontSize="12" color="#888888" width="30">7</text><text name="r7-score" fontSize="12" color="#ffffff" width="80">---</text><text name="r7-mode" fontSize="12" color="#00cccc" width="80">---</text><text name="r7-date" fontSize="12" color="#888888" width="80">---</text></container>
+    <container flexDirection="row" gap="8"><text name="r8-rank" fontSize="12" color="#888888" width="30">8</text><text name="r8-score" fontSize="12" color="#ffffff" width="80">---</text><text name="r8-mode" fontSize="12" color="#00cccc" width="80">---</text><text name="r8-date" fontSize="12" color="#888888" width="80">---</text></container>
+    <container flexDirection="row" gap="8"><text name="r9-rank" fontSize="12" color="#888888" width="30">9</text><text name="r9-score" fontSize="12" color="#ffffff" width="80">---</text><text name="r9-mode" fontSize="12" color="#00cccc" width="80">---</text><text name="r9-date" fontSize="12" color="#888888" width="80">---</text></container>
+    <container flexDirection="row" gap="8"><text name="r10-rank" fontSize="12" color="#888888" width="30">10</text><text name="r10-score" fontSize="12" color="#ffffff" width="80">---</text><text name="r10-mode" fontSize="12" color="#00cccc" width="80">---</text><text name="r10-date" fontSize="12" color="#888888" width="80">---</text></container>
+  </container>
+  <text name="btn-back" fontSize="16" color="#888888" backgroundColor="#222222" padding="6" borderRadius="4" width="120" textAlign="center">BACK</text>
+</container>

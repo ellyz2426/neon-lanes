@@ -1,0 +1,15 @@
+<container flexDirection="column" alignItems="center" gap="4" padding="8">
+  <container flexDirection="row" gap="16" alignItems="center">
+    <text name="frame-label" fontSize="14" color="#00ffff">Frame 1/10</text>
+    <text name="throw-label" fontSize="14" color="#ffff00">Throw 1</text>
+    <text name="mode-label" fontSize="12" color="#888888">CLASSIC</text>
+  </container>
+  <container flexDirection="row" gap="20" alignItems="center">
+    <text name="score-label" fontSize="32" fontWeight="bold" color="#00ffff">0</text>
+    <container flexDirection="column" alignItems="center">
+      <text name="pins-label" fontSize="16" color="#ff8800">10 pins</text>
+      <text name="combo-label" fontSize="12" color="#ff00ff"> </text>
+    </container>
+  </container>
+  <text name="time-label" fontSize="14" color="#ffff00"> </text>
+</container>

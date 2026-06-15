@@ -1,0 +1,33 @@
+<container flexDirection="column" alignItems="center" gap="8" padding="12">
+  <text fontSize="24" fontWeight="bold" color="#00ffff">HOW TO PLAY</text>
+  <container flexDirection="column" gap="6" width="320">
+    <text fontSize="16" fontWeight="bold" color="#ff8800">Browser Controls</text>
+    <text fontSize="12" color="#cccccc">A/D or Arrows: Aim left/right</text>
+    <text fontSize="12" color="#cccccc">W/S: Adjust spin</text>
+    <text fontSize="12" color="#cccccc">Hold Space: Charge power</text>
+    <text fontSize="12" color="#cccccc">Release Space: Throw ball</text>
+    <text fontSize="12" color="#cccccc">ESC: Pause</text>
+    <text fontSize="12" color="#cccccc">R: Rematch (game over)</text>
+    <text fontSize="16" fontWeight="bold" color="#ff8800">VR Controls</text>
+    <text fontSize="12" color="#cccccc">Right Thumbstick: Aim left/right</text>
+    <text fontSize="12" color="#cccccc">Left Thumbstick: Adjust spin</text>
+    <text fontSize="12" color="#cccccc">Right Trigger: Charge + throw</text>
+    <text fontSize="12" color="#cccccc">B Button: Pause</text>
+    <text fontSize="16" fontWeight="bold" color="#ff8800">Scoring</text>
+    <text fontSize="12" color="#cccccc">Strike (X): All 10 pins, throw 1</text>
+    <text fontSize="12" color="#cccccc">  Bonus: next 2 throws added</text>
+    <text fontSize="12" color="#cccccc">Spare (/): All pins in 2 throws</text>
+    <text fontSize="12" color="#cccccc">  Bonus: next 1 throw added</text>
+    <text fontSize="12" color="#cccccc">Perfect game: 300 points</text>
+    <text fontSize="16" fontWeight="bold" color="#ff8800">Game Modes</text>
+    <text fontSize="12" color="#cccccc">Classic: Standard 10-frame game</text>
+    <text fontSize="12" color="#cccccc">Speed: Timed -- max pins in 60s</text>
+    <text fontSize="12" color="#cccccc">Strike Zone: Strikes only count</text>
+    <text fontSize="12" color="#cccccc">Power Bowl: Power-ups on lane</text>
+    <text fontSize="12" color="#cccccc">Daily: Seeded daily challenge</text>
+    <text fontSize="12" color="#cccccc">Practice: Unlimited, no pressure</text>
+    <text fontSize="12" color="#cccccc">Tournament: 3-game series vs AI</text>
+    <text fontSize="12" color="#cccccc">Zen: Relaxed, no scoring</text>
+  </container>
+  <text name="btn-back" fontSize="16" color="#888888" backgroundColor="#222222" padding="6" borderRadius="4" width="120" textAlign="center">BACK</text>
+</container>

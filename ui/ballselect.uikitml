@@ -1,0 +1,22 @@
+<container flexDirection="column" alignItems="center" gap="8" padding="12">
+  <text fontSize="24" fontWeight="bold" color="#ff8800">BALL SKINS</text>
+  <container flexDirection="column" gap="4" width="280">
+    <container flexDirection="row" gap="6">
+      <text name="s1" fontSize="14" color="#00ffff" backgroundColor="#003344" padding="6" borderRadius="4" width="130" textAlign="center">Neon Cyan</text>
+      <text name="s2" fontSize="14" color="#ff4400" backgroundColor="#331100" padding="6" borderRadius="4" width="130" textAlign="center">Solar Flare</text>
+    </container>
+    <container flexDirection="row" gap="6">
+      <text name="s3" fontSize="14" color="#ff00ff" backgroundColor="#330033" padding="6" borderRadius="4" width="130" textAlign="center">Plasma Pink</text>
+      <text name="s4" fontSize="14" color="#88ccff" backgroundColor="#223344" padding="6" borderRadius="4" width="130" textAlign="center">Frost Ball</text>
+    </container>
+    <container flexDirection="row" gap="6">
+      <text name="s5" fontSize="14" color="#00ff66" backgroundColor="#003322" padding="6" borderRadius="4" width="130" textAlign="center">Toxic Green</text>
+      <text name="s6" fontSize="14" color="#ffcc00" backgroundColor="#332200" padding="6" borderRadius="4" width="130" textAlign="center">Royal Gold</text>
+    </container>
+    <container flexDirection="row" gap="6">
+      <text name="s7" fontSize="14" color="#aa66ff" backgroundColor="#220044" padding="6" borderRadius="4" width="130" textAlign="center">Void Purple</text>
+      <text name="s8" fontSize="14" color="#ff6600" backgroundColor="#331100" padding="6" borderRadius="4" width="130" textAlign="center">Inferno</text>
+    </container>
+  </container>
+  <text name="btn-back" fontSize="16" color="#888888" backgroundColor="#222222" padding="6" borderRadius="4" width="120" textAlign="center">BACK</text>
+</container>

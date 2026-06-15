@@ -1,0 +1,14 @@
+<container flexDirection="column" alignItems="center" gap="10" padding="16">
+  <text fontSize="28" fontWeight="bold" color="#00ffff">SELECT MODE</text>
+  <container flexDirection="column" gap="6" width="280">
+    <text name="btn-classic" fontSize="18" fontWeight="bold" color="#00ffff" backgroundColor="#003344" padding="8" borderRadius="4" textAlign="center">CLASSIC (10 Frames)</text>
+    <text name="btn-speed" fontSize="18" color="#ff8800" backgroundColor="#332200" padding="8" borderRadius="4" textAlign="center">SPEED BOWL (Timed)</text>
+    <text name="btn-strike" fontSize="18" color="#ff00ff" backgroundColor="#330033" padding="8" borderRadius="4" textAlign="center">STRIKE ZONE</text>
+    <text name="btn-power" fontSize="18" color="#00ff00" backgroundColor="#003300" padding="8" borderRadius="4" textAlign="center">POWER BOWL</text>
+    <text name="btn-daily" fontSize="18" color="#ffff00" backgroundColor="#333300" padding="8" borderRadius="4" textAlign="center">DAILY CHALLENGE</text>
+    <text name="btn-practice" fontSize="18" color="#8888ff" backgroundColor="#222244" padding="8" borderRadius="4" textAlign="center">PRACTICE</text>
+    <text name="btn-tournament" fontSize="18" color="#ff4444" backgroundColor="#331111" padding="8" borderRadius="4" textAlign="center">TOURNAMENT</text>
+    <text name="btn-zen" fontSize="18" color="#88ffaa" backgroundColor="#224433" padding="8" borderRadius="4" textAlign="center">ZEN</text>
+  </container>
+  <text name="btn-back" fontSize="16" color="#888888" backgroundColor="#222222" padding="6" borderRadius="4" width="120" textAlign="center">BACK</text>
+</container>

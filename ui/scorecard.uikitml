@@ -1,0 +1,58 @@
+<container flexDirection="column" alignItems="center" gap="6" padding="12">
+  <text fontSize="20" fontWeight="bold" color="#00ffff">SCORECARD</text>
+  <container flexDirection="row" gap="4">
+    <container flexDirection="column" alignItems="center" width="36" backgroundColor="#002222" padding="2" borderRadius="2">
+      <text fontSize="10" color="#888888">1</text>
+      <text name="f1-marks" fontSize="12" color="#00ffff">  </text>
+      <text name="f1-score" fontSize="14" fontWeight="bold" color="#ffffff"> </text>
+    </container>
+    <container flexDirection="column" alignItems="center" width="36" backgroundColor="#002222" padding="2" borderRadius="2">
+      <text fontSize="10" color="#888888">2</text>
+      <text name="f2-marks" fontSize="12" color="#00ffff">  </text>
+      <text name="f2-score" fontSize="14" fontWeight="bold" color="#ffffff"> </text>
+    </container>
+    <container flexDirection="column" alignItems="center" width="36" backgroundColor="#002222" padding="2" borderRadius="2">
+      <text fontSize="10" color="#888888">3</text>
+      <text name="f3-marks" fontSize="12" color="#00ffff">  </text>
+      <text name="f3-score" fontSize="14" fontWeight="bold" color="#ffffff"> </text>
+    </container>
+    <container flexDirection="column" alignItems="center" width="36" backgroundColor="#002222" padding="2" borderRadius="2">
+      <text fontSize="10" color="#888888">4</text>
+      <text name="f4-marks" fontSize="12" color="#00ffff">  </text>
+      <text name="f4-score" fontSize="14" fontWeight="bold" color="#ffffff"> </text>
+    </container>
+    <container flexDirection="column" alignItems="center" width="36" backgroundColor="#002222" padding="2" borderRadius="2">
+      <text fontSize="10" color="#888888">5</text>
+      <text name="f5-marks" fontSize="12" color="#00ffff">  </text>
+      <text name="f5-score" fontSize="14" fontWeight="bold" color="#ffffff"> </text>
+    </container>
+  </container>
+  <container flexDirection="row" gap="4">
+    <container flexDirection="column" alignItems="center" width="36" backgroundColor="#002222" padding="2" borderRadius="2">
+      <text fontSize="10" color="#888888">6</text>
+      <text name="f6-marks" fontSize="12" color="#00ffff">  </text>
+      <text name="f6-score" fontSize="14" fontWeight="bold" color="#ffffff"> </text>
+    </container>
+    <container flexDirection="column" alignItems="center" width="36" backgroundColor="#002222" padding="2" borderRadius="2">
+      <text fontSize="10" color="#888888">7</text>
+      <text name="f7-marks" fontSize="12" color="#00ffff">  </text>
+      <text name="f7-score" fontSize="14" fontWeight="bold" color="#ffffff"> </text>
+    </container>
+    <container flexDirection="column" alignItems="center" width="36" backgroundColor="#002222" padding="2" borderRadius="2">
+      <text fontSize="10" color="#888888">8</text>
+      <text name="f8-marks" fontSize="12" color="#00ffff">  </text>
+      <text name="f8-score" fontSize="14" fontWeight="bold" color="#ffffff"> </text>
+    </container>
+    <container flexDirection="column" alignItems="center" width="36" backgroundColor="#002222" padding="2" borderRadius="2">
+      <text fontSize="10" color="#888888">9</text>
+      <text name="f9-marks" fontSize="12" color="#00ffff">  </text>
+      <text name="f9-score" fontSize="14" fontWeight="bold" color="#ffffff"> </text>
+    </container>
+    <container flexDirection="column" alignItems="center" width="44" backgroundColor="#003333" padding="2" borderRadius="2">
+      <text fontSize="10" color="#ffff00">10</text>
+      <text name="f10-marks" fontSize="12" color="#00ffff">   </text>
+      <text name="f10-score" fontSize="14" fontWeight="bold" color="#ffffff"> </text>
+    </container>
+  </container>
+  <text name="total-score" fontSize="24" fontWeight="bold" color="#00ffff">Total: 0</text>
+</container>
