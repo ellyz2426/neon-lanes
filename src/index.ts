@@ -14,6 +14,7 @@ import {
   AmbientLight,
   PointLight,
   DirectionalLight,
+  SpotLight,
   Fog,
   DoubleSide,
   LineSegments,
@@ -24,6 +25,7 @@ import {
 } from '@iwsdk/core';
 
 import { BowlingSystem } from './game-system.js';
+import { buildBackstop, buildNeonSigns, buildSideLanes } from './effects.js';
 
 async function main() {
   const container = document.getElementById('app') as HTMLDivElement;
@@ -49,12 +51,12 @@ async function main() {
 
   // Scene atmosphere
   world.scene.background = new Color(0x000811);
-  world.scene.fog = new Fog(0x000811, 25, 60);
+  world.scene.fog = new Fog(0x000811, 30, 65);
 
   // -- Lighting --
-  world.scene.add(new AmbientLight(0x112244, 0.35));
+  world.scene.add(new AmbientLight(0x112244, 0.4));
 
-  const dirLight = new DirectionalLight(0x4488ff, 0.4);
+  const dirLight = new DirectionalLight(0x4488ff, 0.45);
   dirLight.position.set(0, 10, -8);
   world.scene.add(dirLight);
 
@@ -70,8 +72,25 @@ async function main() {
   pinLight.position.set(0, 3, -16.5);
   world.scene.add(pinLight);
 
+  // Spotlight on pin area for drama
+  const pinSpot = new SpotLight(0xffeedd, 0.6, 20, Math.PI / 8, 0.5);
+  pinSpot.position.set(0, 5, -14);
+  pinSpot.target.position.set(0, 0, -16);
+  world.scene.add(pinSpot);
+  world.scene.add(pinSpot.target);
+
+  // Foul line accent light
+  const foulLight = new PointLight(0xff4444, 0.3, 5);
+  foulLight.position.set(0, 0.5, 0);
+  world.scene.add(foulLight);
+
   // -- Build bowling environment --
   buildLane(world);
+
+  // -- Environment enhancements --
+  buildBackstop(world.scene, 1.1, -16);
+  buildNeonSigns(world.scene);
+  buildSideLanes(world.scene, 18);
 
   // -- Create panels (all follower-based for VR/browser compatibility) --
   const panels: { config: string; offset: [number, number, number]; speed: number }[] = [

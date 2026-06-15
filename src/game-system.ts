@@ -19,6 +19,15 @@ import {
   AdditiveBlending,
 } from '@iwsdk/core';
 
+import {
+  ParticleSystem,
+  BallTrail,
+  AimGuide,
+  PinSweep,
+  FloorArrows,
+  AmbientMusic,
+} from './effects.js';
+
 // ══════════════════════════════════════════════════════════════
 // Constants
 // ══════════════════════════════════════════════════════════════
@@ -343,6 +352,16 @@ export class BowlingSystem extends createSystem({
   private gameHadGutter = false;
   private gameAllSpares = true;
 
+  // Effects
+  private particles!: ParticleSystem;
+  private ballTrail!: BallTrail;
+  private aimGuide!: AimGuide;
+  private pinSweep!: PinSweep;
+  private floorArrows!: FloorArrows;
+  private ambientMusic!: AmbientMusic;
+  private sweepPending = false;
+  private trailTimer = 0;
+
   /** Access keyboard via the runtime InputManager (not exposed in types) */
   private _kb(): KeyboardLike {
     return (this.input as unknown as { keyboard: KeyboardLike }).keyboard;
@@ -355,6 +374,16 @@ export class BowlingSystem extends createSystem({
     this.ballsUsed.add(this.career.selectedBall);
     this.createPins();
     this.createBall();
+
+    // Initialize effects
+    this.particles = new ParticleSystem(this.world.scene);
+    const skin = BALL_SKINS[this.career.selectedBall] || BALL_SKINS[0];
+    this.ballTrail = new BallTrail(this.world.scene, skin.emissive);
+    this.aimGuide = new AimGuide(this.world.scene);
+    this.pinSweep = new PinSweep(this.world.scene, LANE_W, PIN_ZONE_Z);
+    this.floorArrows = new FloorArrows(this.world.scene);
+    this.ambientMusic = new AmbientMusic();
+
     this.bindPanels();
   }
 
@@ -453,6 +482,8 @@ export class BowlingSystem extends createSystem({
     const skin = BALL_SKINS[this.career.selectedBall] || BALL_SKINS[0];
     this.ballMat.color.setHex(skin.color);
     this.ballMat.emissive.setHex(skin.emissive);
+    if (this.ballTrail) this.ballTrail.setColor(skin.emissive);
+    if (this.aimGuide) this.aimGuide.setColor(skin.emissive);
   }
 
   private resetPins(fullReset: boolean) {
@@ -734,6 +765,20 @@ export class BowlingSystem extends createSystem({
     this.gameAllSpares = true;
     this.speedModeTimer = 60;
     this.speedModePins = 0;
+    this.sweepPending = false;
+
+    // Clear effects
+    this.particles.clear();
+    this.ballTrail.clear();
+    this.aimGuide.hide();
+
+    // Start ambient music
+    const musicVol = (this.career.masterVol / 100) * (this.career.musicVol / 100) * 0.06;
+    if (!this.ambientMusic.isPlaying()) {
+      this.ambientMusic.start(musicVol);
+    } else {
+      this.ambientMusic.setVolume(musicVol);
+    }
 
     // Hide all menu panels
     for (const p of ['title', 'modeselect', 'gameover', 'pause', 'leaderboard',
@@ -796,6 +841,11 @@ export class BowlingSystem extends createSystem({
     this.ballVelX = this.spinAmount * SPIN_CURVE_FACTOR;
     this.ballInGutter = false;
 
+    // Clear effects
+    this.ballTrail.clear();
+    this.aimGuide.hide();
+    this.trailTimer = 0;
+
     sfxRoll();
   }
 
@@ -808,6 +858,11 @@ export class BowlingSystem extends createSystem({
     const dt = Math.min(delta, 0.1);
 
     this.updateToast(dt);
+    this.particles.update(dt);
+    this.ballTrail.update(dt);
+    this.pinSweep.update(dt);
+    const isAiming = this.state === GameState.AIMING || this.state === GameState.CHARGING;
+    this.floorArrows.update(dt, isAiming);
 
     switch (this.state) {
       case GameState.COUNTDOWN:
@@ -818,9 +873,17 @@ export class BowlingSystem extends createSystem({
         this.handleInput(dt);
         this.updatePowerBar();
         this.updateAimVisual();
+        // Show aim guide
+        this.aimGuide.show(this.aimX, BALL_START_Z, this.spinAmount, LANE_W);
         break;
       case GameState.ROLLING:
         this.updateBallPhysics(dt);
+        // Ball trail
+        this.trailTimer += dt;
+        if (this.trailTimer > 0.02) {
+          this.trailTimer = 0;
+          this.ballTrail.addPoint(new Vector3(this.ballX, BALL_RADIUS, this.ballZ));
+        }
         break;
       case GameState.PIN_RESULT:
         this.updatePinResult(dt);
@@ -829,6 +892,8 @@ export class BowlingSystem extends createSystem({
         this.handlePauseInput();
         break;
       default:
+        // Hide aim guide when not aiming
+        this.aimGuide.hide();
         break;
     }
 
@@ -969,6 +1034,7 @@ export class BowlingSystem extends createSystem({
     if (!this.ballInGutter && Math.abs(this.ballX) > GUTTER_X) {
       this.ballInGutter = true;
       this.ballVelX = 0;
+      this.particles.emitGutter(new Vector3(this.ballX, BALL_RADIUS, this.ballZ));
       sfxGutter();
     }
 
@@ -998,6 +1064,7 @@ export class BowlingSystem extends createSystem({
     const ballWorldX = this.ballX;
     const ballWorldZ = this.ballZ;
     const hitRadius = BALL_RADIUS + PIN_RADIUS;
+    let hitCount = 0;
 
     for (let i = 0; i < 10; i++) {
       if (!this.pinStanding[i]) continue;
@@ -1012,7 +1079,16 @@ export class BowlingSystem extends createSystem({
 
       if (dist < hitRadius) {
         this.knockPin(i, dx, dz);
+        hitCount++;
       }
+    }
+
+    // Pin hit particles
+    if (hitCount > 0) {
+      this.particles.emitPinHit(
+        new Vector3(ballWorldX, 0.2, ballWorldZ),
+        hitCount,
+      );
     }
   }
 
@@ -1075,12 +1151,18 @@ export class BowlingSystem extends createSystem({
     this.state = GameState.PIN_RESULT;
     this.resultTimer = 1.0;
 
+    // Clear ball trail
+    this.ballTrail.clear();
+
     // Store the throw count for scoring after the delay
     (this as any)._pendingPinsThisThrow = pinsThisThrow;
     (this as any)._pendingPinsDown = pinsDown;
   }
 
   private updatePinResult(dt: number) {
+    // Skip if pin sweep is playing
+    if (this.sweepPending) return;
+
     this.resultTimer -= dt;
     if (this.resultTimer > 0) return;
 
@@ -1131,12 +1213,14 @@ export class BowlingSystem extends createSystem({
       if (this.currentStreak > this.career.bestStreak) {
         this.career.bestStreak = this.currentStreak;
       }
+      this.particles.emitStrike(new Vector3(0, 0.5, PIN_ZONE_Z));
       sfxStrike();
       this.showToast('STRIKE!');
     } else if (isSpare) {
       this.frameMarks[this.frame - 1].push('/');
       this.gameSpares++;
       this.currentStreak = 0;
+      this.particles.emitSpare(new Vector3(0, 0.5, PIN_ZONE_Z));
       sfxSpare();
       this.showToast('SPARE!');
     } else {
@@ -1208,13 +1292,23 @@ export class BowlingSystem extends createSystem({
   private nextFrame() {
     this.frame++;
     this.throwNum = 1;
-    this.resetPins(true);
-    this.resetBall();
 
     if (this.frame > 10) {
       this.endGame();
     } else {
-      this.state = GameState.AIMING;
+      // Pin sweep animation before resetting
+      this.sweepPending = true;
+      this.ballGroup.visible = false;
+      this.ballTrail.clear();
+      this.pinSweep.start(() => {
+        this.sweepPending = false;
+        this.resetPins(true);
+        this.resetBall();
+        this.state = GameState.AIMING;
+      });
+      // Temporarily idle while sweep plays
+      this.state = GameState.PIN_RESULT;
+      this.resultTimer = -99; // won't re-trigger result logic
     }
   }
 
@@ -1293,6 +1387,11 @@ export class BowlingSystem extends createSystem({
     this.state = GameState.GAME_OVER;
     this.calculateScores();
 
+    // Stop ambient music
+    this.ambientMusic.stop();
+    this.aimGuide.hide();
+    this.ballTrail.clear();
+
     let finalScore = this.totalScore;
     if (this.mode === GameMode.SPEED) {
       finalScore = this.speedModePins;
@@ -1319,6 +1418,7 @@ export class BowlingSystem extends createSystem({
     if (newLevel > this.career.level) {
       this.career.level = newLevel;
       this.showToast('Level Up! ' + this.career.level);
+      this.particles.emitLevelUp(new Vector3(0, 1, -2));
     }
 
     // High scores
