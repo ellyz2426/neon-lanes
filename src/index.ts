@@ -155,8 +155,9 @@ function buildLane(world: World) {
   lane.position.set(0, 0.001, -LANE_LEN / 2 + 1);
   world.scene.add(lane);
 
-  // Gutters
+  // Gutters (depressed channels)
   for (const s of [-1, 1]) {
+    // Gutter floor (lower than lane)
     const gGeo = new PlaneGeometry(GUTTER_W, LANE_LEN);
     const gMat = new MeshStandardMaterial({
       color: 0x0a0a0a,
@@ -165,8 +166,19 @@ function buildLane(world: World) {
     });
     const g = new Mesh(gGeo, gMat);
     g.rotation.x = -Math.PI / 2;
-    g.position.set(s * (LANE_W / 2 + GUTTER_W / 2), -0.015, -LANE_LEN / 2 + 1);
+    g.position.set(s * (LANE_W / 2 + GUTTER_W / 2), -0.04, -LANE_LEN / 2 + 1);
     world.scene.add(g);
+
+    // Gutter inner wall (slight lip)
+    const lipGeo = new BoxGeometry(0.02, 0.04, LANE_LEN);
+    const lipMat = new MeshStandardMaterial({
+      color: 0x111111,
+      emissive: 0x001133,
+      emissiveIntensity: 0.1,
+    });
+    const lip = new Mesh(lipGeo, lipMat);
+    lip.position.set(s * LANE_W / 2, -0.02, -LANE_LEN / 2 + 1);
+    world.scene.add(lip);
   }
 
   // Approach area (behind foul line)

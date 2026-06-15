@@ -10,7 +10,7 @@
           "HOW TO PLAY"
         ],
         "properties": {
-          "fontsize": "24",
+          "fontsize": "22",
           "fontweight": "bold",
           "color": "#00ffff"
         },
@@ -21,151 +21,187 @@
         "type": "custom",
         "children": [
           {
-            "sourceTag": "text",
+            "sourceTag": "container",
             "type": "custom",
             "children": [
-              "Browser Controls"
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "Browser"
+                ],
+                "properties": {
+                  "fontsize": "14",
+                  "fontweight": "bold",
+                  "color": "#ff8800"
+                },
+                "dataUid": "uid-5"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "A/D: Aim left/right"
+                ],
+                "properties": {
+                  "fontsize": "11",
+                  "color": "#cccccc"
+                },
+                "dataUid": "uid-6"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "W/S: Adjust spin"
+                ],
+                "properties": {
+                  "fontsize": "11",
+                  "color": "#cccccc"
+                },
+                "dataUid": "uid-7"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "Hold Space: Charge"
+                ],
+                "properties": {
+                  "fontsize": "11",
+                  "color": "#cccccc"
+                },
+                "dataUid": "uid-8"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "Release: Throw"
+                ],
+                "properties": {
+                  "fontsize": "11",
+                  "color": "#cccccc"
+                },
+                "dataUid": "uid-9"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "ESC: Pause"
+                ],
+                "properties": {
+                  "fontsize": "11",
+                  "color": "#cccccc"
+                },
+                "dataUid": "uid-10"
+              }
             ],
             "properties": {
-              "fontsize": "16",
-              "fontweight": "bold",
-              "color": "#ff8800"
+              "flexdirection": "column",
+              "gap": "4",
+              "width": "160"
             },
             "dataUid": "uid-4"
           },
           {
-            "sourceTag": "text",
+            "sourceTag": "container",
             "type": "custom",
             "children": [
-              "A/D or Arrows: Aim left/right"
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "VR"
+                ],
+                "properties": {
+                  "fontsize": "14",
+                  "fontweight": "bold",
+                  "color": "#ff8800"
+                },
+                "dataUid": "uid-12"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "Right stick: Aim"
+                ],
+                "properties": {
+                  "fontsize": "11",
+                  "color": "#cccccc"
+                },
+                "dataUid": "uid-13"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "Left stick: Spin"
+                ],
+                "properties": {
+                  "fontsize": "11",
+                  "color": "#cccccc"
+                },
+                "dataUid": "uid-14"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "Right trigger: Throw"
+                ],
+                "properties": {
+                  "fontsize": "11",
+                  "color": "#cccccc"
+                },
+                "dataUid": "uid-15"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "B button: Pause"
+                ],
+                "properties": {
+                  "fontsize": "11",
+                  "color": "#cccccc"
+                },
+                "dataUid": "uid-16"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "Laser: Click UI"
+                ],
+                "properties": {
+                  "fontsize": "11",
+                  "color": "#cccccc"
+                },
+                "dataUid": "uid-17"
+              }
             ],
             "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-5"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "W/S: Adjust spin"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-6"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Hold Space: Charge power"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-7"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Release Space: Throw ball"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-8"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "ESC: Pause"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-9"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "R: Rematch (game over)"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-10"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "VR Controls"
-            ],
-            "properties": {
-              "fontsize": "16",
-              "fontweight": "bold",
-              "color": "#ff8800"
+              "flexdirection": "column",
+              "gap": "4",
+              "width": "160"
             },
             "dataUid": "uid-11"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Right Thumbstick: Aim left/right"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-12"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Left Thumbstick: Adjust spin"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-13"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Right Trigger: Charge + throw"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-14"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "B Button: Pause"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-15"
-          },
+          }
+        ],
+        "properties": {
+          "flexdirection": "row",
+          "gap": "12",
+          "width": "340"
+        },
+        "dataUid": "uid-3"
+      },
+      {
+        "sourceTag": "container",
+        "type": "custom",
+        "children": [
           {
             "sourceTag": "text",
             "type": "custom",
@@ -173,45 +209,9 @@
               "Scoring"
             ],
             "properties": {
-              "fontsize": "16",
+              "fontsize": "14",
               "fontweight": "bold",
               "color": "#ff8800"
-            },
-            "dataUid": "uid-16"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Strike (X): All 10 pins, throw 1"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-17"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Bonus: next 2 throws added"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-18"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Spare (/): All pins in 2 throws"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
             },
             "dataUid": "uid-19"
           },
@@ -219,10 +219,10 @@
             "sourceTag": "text",
             "type": "custom",
             "children": [
-              "Bonus: next 1 throw added"
+              "Strike (X) = all 10 on throw 1 (+next 2 throws)"
             ],
             "properties": {
-              "fontsize": "12",
+              "fontsize": "11",
               "color": "#cccccc"
             },
             "dataUid": "uid-20"
@@ -231,10 +231,10 @@
             "sourceTag": "text",
             "type": "custom",
             "children": [
-              "Perfect game: 300 points"
+              "Spare (/) = all 10 in 2 throws (+next 1 throw)"
             ],
             "properties": {
-              "fontsize": "12",
+              "fontsize": "11",
               "color": "#cccccc"
             },
             "dataUid": "uid-21"
@@ -243,118 +243,251 @@
             "sourceTag": "text",
             "type": "custom",
             "children": [
-              "Game Modes"
+              "Perfect game = 12 strikes = 300 points"
             ],
             "properties": {
-              "fontsize": "16",
-              "fontweight": "bold",
-              "color": "#ff8800"
+              "fontsize": "11",
+              "color": "#cccccc"
             },
             "dataUid": "uid-22"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Classic: Standard 10-frame game"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-23"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Speed: Timed -- max pins in 60s"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-24"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Strike Zone: Strikes only count"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-25"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Power Bowl: Power-ups on lane"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-26"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Daily: Seeded daily challenge"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-27"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Practice: Unlimited, no pressure"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-28"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Tournament: 3-game series vs AI"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-29"
-          },
-          {
-            "sourceTag": "text",
-            "type": "custom",
-            "children": [
-              "Zen: Relaxed, no scoring"
-            ],
-            "properties": {
-              "fontsize": "12",
-              "color": "#cccccc"
-            },
-            "dataUid": "uid-30"
           }
         ],
         "properties": {
           "flexdirection": "column",
-          "gap": "6",
-          "width": "320"
+          "gap": "3",
+          "width": "340"
         },
-        "dataUid": "uid-3"
+        "dataUid": "uid-18"
+      },
+      {
+        "sourceTag": "container",
+        "type": "custom",
+        "children": [
+          {
+            "sourceTag": "text",
+            "type": "custom",
+            "children": [
+              "Game Modes"
+            ],
+            "properties": {
+              "fontsize": "14",
+              "fontweight": "bold",
+              "color": "#ff8800"
+            },
+            "dataUid": "uid-24"
+          },
+          {
+            "sourceTag": "container",
+            "type": "custom",
+            "children": [
+              {
+                "sourceTag": "container",
+                "type": "custom",
+                "children": [
+                  {
+                    "sourceTag": "text",
+                    "type": "custom",
+                    "children": [
+                      "Classic: 10 frames"
+                    ],
+                    "properties": {
+                      "fontsize": "11",
+                      "color": "#00cccc"
+                    },
+                    "dataUid": "uid-27"
+                  },
+                  {
+                    "sourceTag": "text",
+                    "type": "custom",
+                    "children": [
+                      "Speed: Max pins/60s"
+                    ],
+                    "properties": {
+                      "fontsize": "11",
+                      "color": "#00cccc"
+                    },
+                    "dataUid": "uid-28"
+                  },
+                  {
+                    "sourceTag": "text",
+                    "type": "custom",
+                    "children": [
+                      "Strike Zone: X only"
+                    ],
+                    "properties": {
+                      "fontsize": "11",
+                      "color": "#00cccc"
+                    },
+                    "dataUid": "uid-29"
+                  },
+                  {
+                    "sourceTag": "text",
+                    "type": "custom",
+                    "children": [
+                      "Power: High power"
+                    ],
+                    "properties": {
+                      "fontsize": "11",
+                      "color": "#00cccc"
+                    },
+                    "dataUid": "uid-30"
+                  }
+                ],
+                "properties": {
+                  "flexdirection": "column",
+                  "gap": "2",
+                  "width": "160"
+                },
+                "dataUid": "uid-26"
+              },
+              {
+                "sourceTag": "container",
+                "type": "custom",
+                "children": [
+                  {
+                    "sourceTag": "text",
+                    "type": "custom",
+                    "children": [
+                      "Daily: Seeded run"
+                    ],
+                    "properties": {
+                      "fontsize": "11",
+                      "color": "#00cccc"
+                    },
+                    "dataUid": "uid-32"
+                  },
+                  {
+                    "sourceTag": "text",
+                    "type": "custom",
+                    "children": [
+                      "Practice: Free play"
+                    ],
+                    "properties": {
+                      "fontsize": "11",
+                      "color": "#00cccc"
+                    },
+                    "dataUid": "uid-33"
+                  },
+                  {
+                    "sourceTag": "text",
+                    "type": "custom",
+                    "children": [
+                      "Tournament: Series"
+                    ],
+                    "properties": {
+                      "fontsize": "11",
+                      "color": "#00cccc"
+                    },
+                    "dataUid": "uid-34"
+                  },
+                  {
+                    "sourceTag": "text",
+                    "type": "custom",
+                    "children": [
+                      "Zen: Relaxed"
+                    ],
+                    "properties": {
+                      "fontsize": "11",
+                      "color": "#00cccc"
+                    },
+                    "dataUid": "uid-35"
+                  }
+                ],
+                "properties": {
+                  "flexdirection": "column",
+                  "gap": "2",
+                  "width": "160"
+                },
+                "dataUid": "uid-31"
+              }
+            ],
+            "properties": {
+              "flexdirection": "row",
+              "gap": "8",
+              "width": "340"
+            },
+            "dataUid": "uid-25"
+          }
+        ],
+        "properties": {
+          "flexdirection": "column",
+          "gap": "3",
+          "width": "340"
+        },
+        "dataUid": "uid-23"
+      },
+      {
+        "sourceTag": "container",
+        "type": "custom",
+        "children": [
+          {
+            "sourceTag": "text",
+            "type": "custom",
+            "children": [
+              "Tips"
+            ],
+            "properties": {
+              "fontsize": "14",
+              "fontweight": "bold",
+              "color": "#ff8800"
+            },
+            "dataUid": "uid-37"
+          },
+          {
+            "sourceTag": "text",
+            "type": "custom",
+            "children": [
+              "Aim guide shows your trajectory"
+            ],
+            "properties": {
+              "fontsize": "11",
+              "color": "#888888"
+            },
+            "dataUid": "uid-38"
+          },
+          {
+            "sourceTag": "text",
+            "type": "custom",
+            "children": [
+              "Spin curves the ball after release"
+            ],
+            "properties": {
+              "fontsize": "11",
+              "color": "#888888"
+            },
+            "dataUid": "uid-39"
+          },
+          {
+            "sourceTag": "text",
+            "type": "custom",
+            "children": [
+              "Practice mode has gutter bumpers"
+            ],
+            "properties": {
+              "fontsize": "11",
+              "color": "#888888"
+            },
+            "dataUid": "uid-40"
+          },
+          {
+            "sourceTag": "text",
+            "type": "custom",
+            "children": [
+              "Change ball skins in the menu"
+            ],
+            "properties": {
+              "fontsize": "11",
+              "color": "#888888"
+            },
+            "dataUid": "uid-41"
+          }
+        ],
+        "properties": {
+          "flexdirection": "column",
+          "gap": "3",
+          "width": "340"
+        },
+        "dataUid": "uid-36"
       },
       {
         "sourceTag": "text",
@@ -372,13 +505,13 @@
           "width": "120",
           "textalign": "center"
         },
-        "dataUid": "uid-31"
+        "dataUid": "uid-42"
       }
     ],
     "properties": {
       "flexdirection": "column",
       "alignitems": "center",
-      "gap": "8",
+      "gap": "6",
       "padding": "12"
     },
     "dataUid": "uid-1"
@@ -391,7 +524,7 @@
         "column": 0
       },
       "end": {
-        "line": 32,
+        "line": 51,
         "column": 12
       }
     },
@@ -411,7 +544,7 @@
         "column": 2
       },
       "end": {
-        "line": 30,
+        "line": 19,
         "column": 14
       }
     },
@@ -421,277 +554,387 @@
         "column": 4
       },
       "end": {
-        "line": 3,
-        "column": 81
+        "line": 10,
+        "column": 16
       }
     },
     "uid-5": {
       "start": {
         "line": 4,
-        "column": 4
+        "column": 6
       },
       "end": {
         "line": 4,
-        "column": 76
+        "column": 74
       }
     },
     "uid-6": {
       "start": {
         "line": 5,
-        "column": 4
+        "column": 6
       },
       "end": {
         "line": 5,
-        "column": 63
+        "column": 68
       }
     },
     "uid-7": {
       "start": {
         "line": 6,
-        "column": 4
+        "column": 6
       },
       "end": {
         "line": 6,
-        "column": 71
+        "column": 65
       }
     },
     "uid-8": {
       "start": {
         "line": 7,
-        "column": 4
+        "column": 6
       },
       "end": {
         "line": 7,
-        "column": 72
+        "column": 67
       }
     },
     "uid-9": {
       "start": {
         "line": 8,
-        "column": 4
+        "column": 6
       },
       "end": {
         "line": 8,
-        "column": 57
+        "column": 63
       }
     },
     "uid-10": {
       "start": {
         "line": 9,
-        "column": 4
+        "column": 6
       },
       "end": {
         "line": 9,
-        "column": 69
+        "column": 59
       }
     },
     "uid-11": {
       "start": {
-        "line": 10,
+        "line": 11,
         "column": 4
       },
       "end": {
-        "line": 10,
-        "column": 76
+        "line": 18,
+        "column": 16
       }
     },
     "uid-12": {
       "start": {
-        "line": 11,
-        "column": 4
+        "line": 12,
+        "column": 6
       },
       "end": {
-        "line": 11,
-        "column": 79
+        "line": 12,
+        "column": 69
       }
     },
     "uid-13": {
       "start": {
-        "line": 12,
-        "column": 4
+        "line": 13,
+        "column": 6
       },
       "end": {
-        "line": 12,
-        "column": 75
+        "line": 13,
+        "column": 65
       }
     },
     "uid-14": {
       "start": {
-        "line": 13,
-        "column": 4
+        "line": 14,
+        "column": 6
       },
       "end": {
-        "line": 13,
-        "column": 76
+        "line": 14,
+        "column": 65
       }
     },
     "uid-15": {
       "start": {
-        "line": 14,
-        "column": 4
+        "line": 15,
+        "column": 6
       },
       "end": {
-        "line": 14,
-        "column": 62
+        "line": 15,
+        "column": 69
       }
     },
     "uid-16": {
       "start": {
-        "line": 15,
-        "column": 4
+        "line": 16,
+        "column": 6
       },
       "end": {
-        "line": 15,
-        "column": 72
+        "line": 16,
+        "column": 64
       }
     },
     "uid-17": {
       "start": {
-        "line": 16,
-        "column": 4
+        "line": 17,
+        "column": 6
       },
       "end": {
-        "line": 16,
-        "column": 79
+        "line": 17,
+        "column": 64
       }
     },
     "uid-18": {
       "start": {
-        "line": 17,
-        "column": 4
+        "line": 20,
+        "column": 2
       },
       "end": {
-        "line": 17,
-        "column": 75
+        "line": 25,
+        "column": 14
       }
     },
     "uid-19": {
       "start": {
-        "line": 18,
+        "line": 21,
         "column": 4
       },
       "end": {
-        "line": 18,
-        "column": 78
+        "line": 21,
+        "column": 72
       }
     },
     "uid-20": {
       "start": {
-        "line": 19,
+        "line": 22,
         "column": 4
       },
       "end": {
-        "line": 19,
-        "column": 74
+        "line": 22,
+        "column": 94
       }
     },
     "uid-21": {
       "start": {
-        "line": 20,
+        "line": 23,
         "column": 4
       },
       "end": {
-        "line": 20,
-        "column": 71
+        "line": 23,
+        "column": 93
       }
     },
     "uid-22": {
       "start": {
-        "line": 21,
+        "line": 24,
         "column": 4
       },
       "end": {
-        "line": 21,
-        "column": 75
+        "line": 24,
+        "column": 85
       }
     },
     "uid-23": {
       "start": {
-        "line": 22,
-        "column": 4
+        "line": 26,
+        "column": 2
       },
       "end": {
-        "line": 22,
-        "column": 78
+        "line": 42,
+        "column": 14
       }
     },
     "uid-24": {
       "start": {
-        "line": 23,
+        "line": 27,
         "column": 4
       },
       "end": {
-        "line": 23,
-        "column": 78
+        "line": 27,
+        "column": 75
       }
     },
     "uid-25": {
       "start": {
-        "line": 24,
+        "line": 28,
         "column": 4
       },
       "end": {
-        "line": 24,
-        "column": 78
+        "line": 41,
+        "column": 16
       }
     },
     "uid-26": {
       "start": {
-        "line": 25,
-        "column": 4
+        "line": 29,
+        "column": 6
       },
       "end": {
-        "line": 25,
-        "column": 76
+        "line": 34,
+        "column": 18
       }
     },
     "uid-27": {
       "start": {
-        "line": 26,
-        "column": 4
+        "line": 30,
+        "column": 8
       },
       "end": {
-        "line": 26,
-        "column": 76
+        "line": 30,
+        "column": 69
       }
     },
     "uid-28": {
       "start": {
-        "line": 27,
-        "column": 4
+        "line": 31,
+        "column": 8
       },
       "end": {
-        "line": 27,
-        "column": 79
+        "line": 31,
+        "column": 70
       }
     },
     "uid-29": {
       "start": {
-        "line": 28,
-        "column": 4
+        "line": 32,
+        "column": 8
       },
       "end": {
-        "line": 28,
-        "column": 78
+        "line": 32,
+        "column": 70
       }
     },
     "uid-30": {
       "start": {
-        "line": 29,
-        "column": 4
+        "line": 33,
+        "column": 8
       },
       "end": {
-        "line": 29,
-        "column": 71
+        "line": 33,
+        "column": 68
       }
     },
     "uid-31": {
       "start": {
-        "line": 31,
+        "line": 35,
+        "column": 6
+      },
+      "end": {
+        "line": 40,
+        "column": 18
+      }
+    },
+    "uid-32": {
+      "start": {
+        "line": 36,
+        "column": 8
+      },
+      "end": {
+        "line": 36,
+        "column": 68
+      }
+    },
+    "uid-33": {
+      "start": {
+        "line": 37,
+        "column": 8
+      },
+      "end": {
+        "line": 37,
+        "column": 70
+      }
+    },
+    "uid-34": {
+      "start": {
+        "line": 38,
+        "column": 8
+      },
+      "end": {
+        "line": 38,
+        "column": 69
+      }
+    },
+    "uid-35": {
+      "start": {
+        "line": 39,
+        "column": 8
+      },
+      "end": {
+        "line": 39,
+        "column": 63
+      }
+    },
+    "uid-36": {
+      "start": {
+        "line": 43,
         "column": 2
       },
       "end": {
-        "line": 31,
+        "line": 49,
+        "column": 14
+      }
+    },
+    "uid-37": {
+      "start": {
+        "line": 44,
+        "column": 4
+      },
+      "end": {
+        "line": 44,
+        "column": 69
+      }
+    },
+    "uid-38": {
+      "start": {
+        "line": 45,
+        "column": 4
+      },
+      "end": {
+        "line": 45,
+        "column": 78
+      }
+    },
+    "uid-39": {
+      "start": {
+        "line": 46,
+        "column": 4
+      },
+      "end": {
+        "line": 46,
+        "column": 81
+      }
+    },
+    "uid-40": {
+      "start": {
+        "line": 47,
+        "column": 4
+      },
+      "end": {
+        "line": 47,
+        "column": 79
+      }
+    },
+    "uid-41": {
+      "start": {
+        "line": 48,
+        "column": 4
+      },
+      "end": {
+        "line": 48,
+        "column": 76
+      }
+    },
+    "uid-42": {
+      "start": {
+        "line": 50,
+        "column": 2
+      },
+      "end": {
+        "line": 50,
         "column": 151
       }
     }

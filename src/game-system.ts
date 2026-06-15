@@ -382,6 +382,16 @@ export class BowlingSystem extends createSystem({
   private sweepPending = false;
   private trailTimer = 0;
 
+  // Screen shake
+  private shakeIntensity = 0;
+  private shakeDuration = 0;
+  private shakeTimer = 0;
+  private originalCamPos = new Vector3(0, 1.7, 1.0);
+
+  // Spare streak tracking
+  private spareStreak = 0;
+  private lastPower = 0; // track power of last throw for achievement
+
   /** Access keyboard via the runtime InputManager (not exposed in types) */
   private _kb(): KeyboardLike {
     return (this.input as unknown as { keyboard: KeyboardLike }).keyboard;
@@ -881,6 +891,7 @@ export class BowlingSystem extends createSystem({
     this.ballVelZ = -this.ballSpeed;
     this.ballVelX = this.spinAmount * SPIN_CURVE_FACTOR;
     this.ballInGutter = false;
+    this.lastPower = this.power;
 
     // Clear effects
     this.ballTrail.clear();
@@ -940,6 +951,9 @@ export class BowlingSystem extends createSystem({
 
     // Animate falling pins
     this.animatePins(dt);
+
+    // Screen shake
+    this.updateShake(dt);
 
     // Speed mode timer
     if ((this.state === GameState.AIMING || this.state === GameState.CHARGING ||
@@ -1096,6 +1110,8 @@ export class BowlingSystem extends createSystem({
     // Rotate ball for rolling effect
     const rollAngle = (-this.ballVelZ * dt) / BALL_RADIUS;
     this.ballMesh.rotation.x += rollAngle;
+    // Spin rotation on Y axis
+    this.ballMesh.rotation.y += this.spinAmount * dt * 2;
 
     // Check if ball reached pin zone
     if (this.ballZ <= PIN_ZONE_Z + 1.5 && !this.ballInGutter) {
@@ -1258,17 +1274,27 @@ export class BowlingSystem extends createSystem({
       this.frameMarks[this.frame - 1].push('X');
       this.gameStrikes++;
       this.currentStreak++;
+      this.spareStreak = 0;
       if (this.currentStreak > this.career.bestStreak) {
         this.career.bestStreak = this.currentStreak;
       }
       this.particles.emitStrike(new Vector3(0, 0.5, PIN_ZONE_Z));
+      this.triggerShake(0.06, 0.4);
       sfxStrike();
-      this.showToast('STRIKE!');
+      if (this.currentStreak >= 5) {
+        this.showToast(this.currentStreak + 'x STREAK!');
+      } else if (this.currentStreak >= 3) {
+        this.showToast('TURKEY!');
+      } else {
+        this.showToast('STRIKE!');
+      }
     } else if (isSpare) {
       this.frameMarks[this.frame - 1].push('/');
       this.gameSpares++;
+      this.spareStreak++;
       this.currentStreak = 0;
       this.particles.emitSpare(new Vector3(0, 0.5, PIN_ZONE_Z));
+      this.triggerShake(0.03, 0.25);
       sfxSpare();
       this.showToast('SPARE!');
     } else {
@@ -1558,14 +1584,14 @@ export class BowlingSystem extends createSystem({
       } else if (ach.id === 'score_under_50') {
         unlocked = this.totalScore < 50 && this.totalScore > 0 && this.frame >= 10;
       } else if (ach.id === 'max_power_throw') {
-        unlocked = this.power >= 99;
+        unlocked = this.lastPower >= 99;
       } else if (ach.id === 'tournament_win') {
         unlocked = this.mode === GameMode.TOURNAMENT && this.totalScore >= 200;
       } else if (ach.id === 'first_spare_no_guide') {
         // 7-10 split spare: check if frame had pins 7 and 10 standing alone
         unlocked = false; // complex - skip for now
       } else if (ach.id === 'five_in_a_row_spares') {
-        unlocked = this.gameSpares >= 5; // simplified
+        unlocked = this.spareStreak >= 5;
       } else {
         unlocked = ach.check(this.career);
       }
@@ -1785,5 +1811,28 @@ export class BowlingSystem extends createSystem({
     if (l >= 5) return 'Apprentice';
     if (l >= 3) return 'Amateur';
     return 'Rookie';
+  }
+
+  private triggerShake(intensity: number, duration: number) {
+    this.shakeIntensity = intensity;
+    this.shakeDuration = duration;
+    this.shakeTimer = 0;
+  }
+
+  private updateShake(dt: number) {
+    if (this.shakeDuration <= 0) return;
+    this.shakeTimer += dt;
+    if (this.shakeTimer >= this.shakeDuration) {
+      this.shakeDuration = 0;
+      this.world.camera.position.copy(this.originalCamPos);
+      return;
+    }
+    const decay = 1 - (this.shakeTimer / this.shakeDuration);
+    const amp = this.shakeIntensity * decay;
+    this.world.camera.position.set(
+      this.originalCamPos.x + (Math.random() - 0.5) * amp,
+      this.originalCamPos.y + (Math.random() - 0.5) * amp * 0.5,
+      this.originalCamPos.z + (Math.random() - 0.5) * amp * 0.3,
+    );
   }
 }
