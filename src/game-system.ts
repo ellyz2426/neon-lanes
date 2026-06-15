@@ -125,17 +125,20 @@ interface BallSkin {
   name: string;
   color: number;
   emissive: number;
+  weight: number;       // 0.7-1.5: heavier = more pin knockdown, less speed
+  hookPotential: number; // 0.7-1.5: higher = more spin curve effect
+  speedMod: number;     // 0.8-1.2: multiplier on ball speed
 }
 
 const BALL_SKINS: BallSkin[] = [
-  { name: 'Neon Cyan', color: 0x008888, emissive: 0x00ffff },
-  { name: 'Solar Flare', color: 0x884400, emissive: 0xff4400 },
-  { name: 'Plasma Pink', color: 0x880088, emissive: 0xff00ff },
-  { name: 'Frost Ball', color: 0x446688, emissive: 0x88ccff },
-  { name: 'Toxic Green', color: 0x006633, emissive: 0x00ff66 },
-  { name: 'Royal Gold', color: 0x886600, emissive: 0xffcc00 },
-  { name: 'Void Purple', color: 0x440088, emissive: 0xaa66ff },
-  { name: 'Inferno', color: 0x883300, emissive: 0xff6600 },
+  { name: 'Neon Cyan', color: 0x008888, emissive: 0x00ffff, weight: 1.0, hookPotential: 1.0, speedMod: 1.0 },
+  { name: 'Solar Flare', color: 0x884400, emissive: 0xff4400, weight: 1.3, hookPotential: 0.8, speedMod: 0.9 },
+  { name: 'Plasma Pink', color: 0x880088, emissive: 0xff00ff, weight: 0.8, hookPotential: 1.4, speedMod: 1.1 },
+  { name: 'Frost Ball', color: 0x446688, emissive: 0x88ccff, weight: 1.1, hookPotential: 0.9, speedMod: 1.0 },
+  { name: 'Toxic Green', color: 0x006633, emissive: 0x00ff66, weight: 0.9, hookPotential: 1.2, speedMod: 1.05 },
+  { name: 'Royal Gold', color: 0x886600, emissive: 0xffcc00, weight: 1.4, hookPotential: 0.7, speedMod: 0.85 },
+  { name: 'Void Purple', color: 0x440088, emissive: 0xaa66ff, weight: 0.7, hookPotential: 1.5, speedMod: 1.15 },
+  { name: 'Inferno', color: 0x883300, emissive: 0xff6600, weight: 1.5, hookPotential: 1.0, speedMod: 0.8 },
 ];
 
 interface Achievement {
@@ -168,6 +171,9 @@ interface CareerStats {
   oilPattern: number;
   modesPlayed: string[];
   ballsUsed: number[];
+  patternsUsed: number[];
+  themesUsed: number[];
+  splitConversions: number;
 }
 
 const DEFAULT_STATS: CareerStats = {
@@ -179,6 +185,7 @@ const DEFAULT_STATS: CareerStats = {
   masterVol: 80, sfxVol: 80, musicVol: 60,
   laneTheme: 0, bumpers: false,
   oilPattern: 0, modesPlayed: [], ballsUsed: [0],
+  patternsUsed: [0], themesUsed: [0], splitConversions: 0,
 };
 
 // ── Achievements ──────────────────────────────────────────────
@@ -245,6 +252,22 @@ const ACHIEVEMENTS: Achievement[] = [
   { id: 'all_themes', name: 'Decorator', desc: 'Try all 4 lane themes', check: () => false },
   { id: 'three_turkeys', name: 'Fowl Play', desc: '3 turkeys in one game', check: () => false },
   { id: 'no_open_frames', name: 'No Open Frames', desc: 'Mark every frame in a game', check: () => false },
+  // Round 4 achievements
+  { id: 'split_spare', name: 'Split Converter', desc: 'Convert a split to a spare', check: s => s.splitConversions >= 1 },
+  { id: 'split_master', name: 'Split Master', desc: 'Convert 10 splits', check: s => s.splitConversions >= 10 },
+  { id: 'three_splits', name: 'Split City', desc: 'Face 3 splits in one game', check: () => false },
+  { id: 'seven_ten', name: 'Mission Impossible', desc: 'Convert a 7-10 split', check: () => false },
+  { id: 'heavy_hitter', name: 'Heavy Hitter', desc: 'Score 200+ with Inferno ball', check: () => false },
+  { id: 'featherweight', name: 'Featherweight', desc: 'Score 200+ with Void Purple', check: () => false },
+  { id: 'level_30', name: 'Master Bowler', desc: 'Reach level 30', check: s => s.level >= 30 },
+  { id: 'level_40', name: 'Grandmaster', desc: 'Reach level 40', check: s => s.level >= 40 },
+  { id: 'games_200', name: 'Addict', desc: 'Play 200 games', check: s => s.gamesPlayed >= 200 },
+  { id: 'games_500', name: 'Lifetime Member', desc: 'Play 500 games', check: s => s.gamesPlayed >= 500 },
+  { id: 'five_perfects', name: 'Perfection', desc: '5 perfect games', check: s => s.perfectGames >= 5 },
+  { id: 'xp_50000', name: 'XP Overlord', desc: '50000 total XP', check: s => s.xp >= 50000 },
+  { id: 'pins_25000', name: 'Pin Apocalypse', desc: '25000 career pins', check: s => s.totalPins >= 25000 },
+  { id: 'throws_2000', name: 'Iron Arm', desc: '2000 total throws', check: s => s.totalThrows >= 2000 },
+  { id: 'score_total_25k', name: 'Bowling Legend', desc: '25000 total career score', check: s => s.totalScore >= 25000 },
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -418,6 +441,15 @@ export class BowlingSystem extends createSystem({
   private spareStreak = 0;
   private lastPower = 0; // track power of last throw for achievement
 
+  // Split tracking
+  private gameSplits = 0;
+  private splitDetected = false;
+  private splitName = '';
+
+  // Pattern/theme tracking
+  private patternsUsed: Set<number> = new Set();
+  private themesUsed: Set<number> = new Set();
+
   /** Access keyboard via the runtime InputManager (not exposed in types) */
   private _kb(): KeyboardLike {
     return (this.input as unknown as { keyboard: KeyboardLike }).keyboard;
@@ -431,6 +463,8 @@ export class BowlingSystem extends createSystem({
     // Restore persisted modes/balls
     for (const m of (this.career.modesPlayed || [])) this.modesPlayed.add(m);
     for (const b of (this.career.ballsUsed || [0])) this.ballsUsed.add(b);
+    for (const p of (this.career.patternsUsed || [0])) this.patternsUsed.add(p);
+    for (const t of (this.career.themesUsed || [0])) this.themesUsed.add(t);
 
     // Set global audio volumes
     globalMasterVol = this.career.masterVol / 100;
@@ -773,7 +807,8 @@ export class BowlingSystem extends createSystem({
           this.updateBallSkin();
           this.saveStats();
           sfxSelect();
-          this.showToast('Ball: ' + BALL_SKINS[idx].name);
+          const bs = BALL_SKINS[idx];
+          this.showToast(bs.name + ' Wt:' + bs.weight + ' Hook:' + bs.hookPotential + ' Spd:' + bs.speedMod);
         });
       }
       this.clickHandler(doc, 'btn-back', () => this.showPanel('title'));
@@ -908,6 +943,15 @@ export class BowlingSystem extends createSystem({
     this.speedModeTimer = 60;
     this.speedModePins = 0;
     this.sweepPending = false;
+    this.gameSplits = 0;
+    this.splitDetected = false;
+    this.splitName = '';
+
+    // Track pattern/theme usage
+    this.patternsUsed.add(this.career.oilPattern);
+    this.themesUsed.add(this.career.laneTheme);
+    this.career.patternsUsed = Array.from(this.patternsUsed);
+    this.career.themesUsed = Array.from(this.themesUsed);
 
     // Set oil pattern for the game
     this.currentOilPattern = OIL_PATTERNS[this.career.oilPattern] || OIL_PATTERNS[0];
@@ -982,9 +1026,11 @@ export class BowlingSystem extends createSystem({
     this.charging = false;
     this.ballX = this.aimX;
     this.ballZ = BALL_START_Z;
-    this.ballSpeed = MIN_POWER + (MAX_POWER - MIN_POWER) * (this.power / 100);
+    const ballSkin = BALL_SKINS[this.career.selectedBall] || BALL_SKINS[0];
+    const rawSpeed = MIN_POWER + (MAX_POWER - MIN_POWER) * (this.power / 100);
+    this.ballSpeed = rawSpeed * ballSkin.speedMod;
     this.ballVelZ = -this.ballSpeed;
-    this.ballVelX = this.spinAmount * SPIN_CURVE_FACTOR;
+    this.ballVelX = this.spinAmount * SPIN_CURVE_FACTOR * ballSkin.hookPotential;
     this.ballInGutter = false;
     this.lastPower = this.power;
 
@@ -1264,7 +1310,8 @@ export class BowlingSystem extends createSystem({
 
     // Chain reaction - neighboring pins have a chance of falling
     for (const ni of PIN_NEIGHBORS[index]) {
-      if (this.pinStanding[ni] && Math.random() < 0.45) {
+      const ballWeight = (BALL_SKINS[this.career.selectedBall] || BALL_SKINS[0]).weight;
+      if (this.pinStanding[ni] && Math.random() < 0.35 + ballWeight * 0.1) {
         // Delayed chain knock
         setTimeout(() => {
           if (this.pinStanding[ni]) {
@@ -1298,6 +1345,68 @@ export class BowlingSystem extends createSystem({
       m.position.z = pz + dir.z * t * 0.15;
       m.position.y = -t * 0.1;
     }
+  }
+
+  // ── Split detection ──
+
+  private detectSplit(): string | null {
+    // Splits only occur after first throw
+    if (this.throwNum !== 1) return null;
+
+    // Head pin must be down for a split
+    if (this.pinStanding[0]) return null;
+
+    const standing = this.pinStanding.map((s, i) => s ? i : -1).filter(i => i >= 0);
+    if (standing.length < 2) return null;
+
+    // BFS: check if remaining pins form disconnected groups
+    const visited = new Set<number>();
+    const queue = [standing[0]];
+    visited.add(standing[0]);
+
+    while (queue.length > 0) {
+      const pin = queue.shift()!;
+      for (const neighbor of PIN_NEIGHBORS[pin]) {
+        if (standing.includes(neighbor) && !visited.has(neighbor)) {
+          visited.add(neighbor);
+          queue.push(neighbor);
+        }
+      }
+    }
+
+    if (visited.size >= standing.length) return null; // all connected, not a split
+
+    // It's a split! Name famous ones
+    const standingSet = new Set(standing);
+    if (standingSet.size === 2 && standingSet.has(6) && standingSet.has(9)) return '7-10 SPLIT!';
+    if (standingSet.size === 2 && standingSet.has(2) && standingSet.has(9)) return '3-10 SPLIT!';
+    if (standingSet.size === 2 && standingSet.has(1) && standingSet.has(6)) return '2-7 SPLIT!';
+    if (standingSet.size === 2 && standingSet.has(3) && standingSet.has(5)) return '4-6 SPLIT!';
+    if (standingSet.size === 4 && standingSet.has(3) && standingSet.has(5) && standingSet.has(6) && standingSet.has(9)) return 'BIG FOUR!';
+    if (standingSet.size === 3 && standingSet.has(3) && standingSet.has(6) && standingSet.has(9)) return '4-7-10 SPLIT!';
+    return 'SPLIT!';
+  }
+
+  // ── VR haptic feedback ──
+
+  private triggerHaptic(intensity = 0.5, duration = 100) {
+    try {
+      const rightGP = this.input.gamepads.right;
+      const leftGP = this.input.gamepads.left;
+      for (const gp of [rightGP, leftGP]) {
+        if (!gp) continue;
+        const xrGP = (gp as any).gamepad;
+        if (xrGP?.hapticActuators?.[0]) {
+          xrGP.hapticActuators[0].pulse(intensity, duration);
+        } else if (xrGP?.vibrationActuator) {
+          xrGP.vibrationActuator.playEffect('dual-rumble', {
+            duration,
+            strongMagnitude: intensity,
+            weakMagnitude: intensity * 0.5,
+          });
+        }
+      }
+    } catch { /* haptics not available */ }
   }
 
   private onBallDone() {
@@ -1372,11 +1481,13 @@ export class BowlingSystem extends createSystem({
       this.gameStrikes++;
       this.currentStreak++;
       this.spareStreak = 0;
+      this.splitDetected = false;
       if (this.currentStreak > this.career.bestStreak) {
         this.career.bestStreak = this.currentStreak;
       }
       this.particles.emitStrike(new Vector3(0, 0.5, PIN_ZONE_Z));
       this.triggerShake(0.06, 0.4);
+      this.triggerHaptic(1.0, 200);
       sfxStrike();
       if (this.currentStreak >= 5) {
         this.showToast(this.currentStreak + 'x STREAK!');
@@ -1392,8 +1503,16 @@ export class BowlingSystem extends createSystem({
       this.currentStreak = 0;
       this.particles.emitSpare(new Vector3(0, 0.5, PIN_ZONE_Z));
       this.triggerShake(0.03, 0.25);
+      this.triggerHaptic(0.6, 150);
       sfxSpare();
-      this.showToast('SPARE!');
+      if (this.splitDetected) {
+        this.career.splitConversions++;
+        this.showToast('SPLIT CONVERTED!');
+      } else {
+        this.showToast('SPARE!');
+      }
+      this.splitDetected = false;
+      this.splitDetected = false;
     } else {
       if (this.throwNum >= 2 && totalPinsDown < 10) {
         this.gameAllSpares = false;
@@ -1401,9 +1520,23 @@ export class BowlingSystem extends createSystem({
       if (pinsThisThrow === 0) {
         this.frameMarks[this.frame - 1].push('-');
         this.currentStreak = 0;
+        this.triggerHaptic(0.15, 50);
       } else {
         this.frameMarks[this.frame - 1].push('' + pinsThisThrow);
         this.currentStreak = 0;
+        this.triggerHaptic(0.3, 80);
+      }
+
+      // Detect splits after first throw
+      if (this.throwNum === 1 && pinsThisThrow > 0 && pinsThisThrow < 10) {
+        const split = this.detectSplit();
+        if (split) {
+          this.splitDetected = true;
+          this.splitName = split;
+          this.gameSplits++;
+          this.showToast(split);
+          playTone(200, 0.3, 0.1, 'sawtooth'); // ominous split sound
+        }
       }
     }
 
@@ -1688,10 +1821,17 @@ export class BowlingSystem extends createSystem({
       } else if (ach.id === 'oil_master') {
         unlocked = (this.career.oilPattern === 1) && this.totalScore >= 150; // Sport pattern
       } else if (ach.id === 'all_patterns') {
-        // Check if career.modesPlayed on each pattern — simplified: check if they've played 5+ games
-        unlocked = false; // needs pattern tracking, skip for now
+        unlocked = this.patternsUsed.size >= OIL_PATTERNS.length;
       } else if (ach.id === 'all_themes') {
-        unlocked = false; // needs theme tracking, skip for now
+        unlocked = this.themesUsed.size >= LANE_THEMES.length;
+      } else if (ach.id === 'three_splits') {
+        unlocked = this.gameSplits >= 3;
+      } else if (ach.id === 'seven_ten') {
+        unlocked = this.splitDetected && this.splitName === '7-10 SPLIT!' && this.gameSpares > 0;
+      } else if (ach.id === 'heavy_hitter') {
+        unlocked = this.career.selectedBall === 7 && this.totalScore >= 200;
+      } else if (ach.id === 'featherweight') {
+        unlocked = this.career.selectedBall === 6 && this.totalScore >= 200;
       } else if (ach.id === 'three_turkeys') {
         // Check if gameStrikes >= 9 (3 turkeys = 9 consecutive strikes)
         unlocked = this.gameStrikes >= 9;
