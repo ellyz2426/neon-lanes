@@ -27,6 +27,12 @@ import {
   FloorArrows,
   AmbientMusic,
   LANE_THEMES,
+  LaneThemeManager,
+  OilPattern,
+  OIL_PATTERNS,
+  getOilSpinMultiplier,
+  getPinDiagram,
+  OilPatternVisual,
 } from './effects.js';
 
 // ══════════════════════════════════════════════════════════════
@@ -159,6 +165,9 @@ interface CareerStats {
   musicVol: number;
   laneTheme: number;
   bumpers: boolean;
+  oilPattern: number;
+  modesPlayed: string[];
+  ballsUsed: number[];
 }
 
 const DEFAULT_STATS: CareerStats = {
@@ -169,6 +178,7 @@ const DEFAULT_STATS: CareerStats = {
   highScores: [], selectedBall: 0,
   masterVol: 80, sfxVol: 80, musicVol: 60,
   laneTheme: 0, bumpers: false,
+  oilPattern: 0, modesPlayed: [], ballsUsed: [0],
 };
 
 // ── Achievements ──────────────────────────────────────────────
@@ -230,6 +240,11 @@ const ACHIEVEMENTS: Achievement[] = [
   { id: 'score_under_50', name: 'Rough Day', desc: 'Score under 50', check: () => false },
   { id: 'max_power_throw', name: 'Full Force', desc: 'Throw at 100% power', check: () => false },
   { id: 'tournament_win', name: 'Champion', desc: 'Score 200+ in Tournament mode', check: () => false },
+  { id: 'oil_master', name: 'Oil Master', desc: 'Win on Sport oil pattern', check: () => false },
+  { id: 'all_patterns', name: 'Lane Mechanic', desc: 'Play on all 5 oil patterns', check: () => false },
+  { id: 'all_themes', name: 'Decorator', desc: 'Try all 4 lane themes', check: () => false },
+  { id: 'three_turkeys', name: 'Fowl Play', desc: '3 turkeys in one game', check: () => false },
+  { id: 'no_open_frames', name: 'No Open Frames', desc: 'Mark every frame in a game', check: () => false },
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -237,20 +252,28 @@ const ACHIEVEMENTS: Achievement[] = [
 // ══════════════════════════════════════════════════════════════
 
 let audioCtx: AudioContext | null = null;
+let globalSfxVol = 1.0;
+let globalMasterVol = 1.0;
 
 function getAudioCtx(): AudioContext {
   if (!audioCtx) audioCtx = new AudioContext();
   return audioCtx;
 }
 
+function effectiveVol(baseVol: number): number {
+  return baseVol * globalSfxVol * globalMasterVol;
+}
+
 function playTone(freq: number, dur: number, vol = 0.15, type: OscillatorType = 'sine') {
+  const v = effectiveVol(vol);
+  if (v < 0.001) return;
   try {
     const ctx = getAudioCtx();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = type;
     osc.frequency.value = freq;
-    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.setValueAtTime(v, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
     osc.connect(gain).connect(ctx.destination);
     osc.start();
@@ -379,6 +402,9 @@ export class BowlingSystem extends createSystem({
   private pinSweep!: PinSweep;
   private floorArrows!: FloorArrows;
   private ambientMusic!: AmbientMusic;
+  private themeManager!: LaneThemeManager;
+  private oilVisual!: OilPatternVisual;
+  private currentOilPattern!: OilPattern;
   private sweepPending = false;
   private trailTimer = 0;
 
@@ -402,6 +428,14 @@ export class BowlingSystem extends createSystem({
   init() {
     this.career = this.loadStats();
     this.ballsUsed.add(this.career.selectedBall);
+    // Restore persisted modes/balls
+    for (const m of (this.career.modesPlayed || [])) this.modesPlayed.add(m);
+    for (const b of (this.career.ballsUsed || [0])) this.ballsUsed.add(b);
+
+    // Set global audio volumes
+    globalMasterVol = this.career.masterVol / 100;
+    globalSfxVol = this.career.sfxVol / 100;
+
     this.createPins();
     this.createBall();
 
@@ -413,6 +447,14 @@ export class BowlingSystem extends createSystem({
     this.pinSweep = new PinSweep(this.world.scene, LANE_W, PIN_ZONE_Z);
     this.floorArrows = new FloorArrows(this.world.scene);
     this.ambientMusic = new AmbientMusic();
+
+    // Lane theme manager
+    this.themeManager = new LaneThemeManager(this.world.scene);
+    this.themeManager.applyTheme(this.career.laneTheme);
+
+    // Oil pattern
+    this.currentOilPattern = OIL_PATTERNS[this.career.oilPattern] || OIL_PATTERNS[0];
+    this.oilVisual = new OilPatternVisual(this.world.scene, LANE_W);
 
     this.bindPanels();
   }
@@ -632,29 +674,71 @@ export class BowlingSystem extends createSystem({
       this.achPage = 0;
       this.updateAchievementsPanel(doc);
       this.clickHandler(doc, 'btn-prev', () => { if (this.achPage > 0) { this.achPage--; this.updateAchievementsPanel(doc); } });
-      this.clickHandler(doc, 'btn-next', () => { if (this.achPage < 3) { this.achPage++; this.updateAchievementsPanel(doc); } });
+      this.clickHandler(doc, 'btn-next', () => { if (this.achPage < 4) { this.achPage++; this.updateAchievementsPanel(doc); } });
       this.clickHandler(doc, 'btn-back', () => this.showPanel('title'));
     });
 
     // Settings
     bind('settings', this.queries.settings, (doc) => {
-      this.clickHandler(doc, 'btn-master-up', () => { this.career.masterVol = Math.min(100, this.career.masterVol + 10); this.updateSettingsPanel(doc); this.saveStats(); });
-      this.clickHandler(doc, 'btn-master-down', () => { this.career.masterVol = Math.max(0, this.career.masterVol - 10); this.updateSettingsPanel(doc); this.saveStats(); });
-      this.clickHandler(doc, 'btn-sfx-up', () => { this.career.sfxVol = Math.min(100, this.career.sfxVol + 10); this.updateSettingsPanel(doc); this.saveStats(); });
-      this.clickHandler(doc, 'btn-sfx-down', () => { this.career.sfxVol = Math.max(0, this.career.sfxVol - 10); this.updateSettingsPanel(doc); this.saveStats(); });
-      this.clickHandler(doc, 'btn-music-up', () => { this.career.musicVol = Math.min(100, this.career.musicVol + 10); this.updateSettingsPanel(doc); this.saveStats(); });
-      this.clickHandler(doc, 'btn-music-down', () => { this.career.musicVol = Math.max(0, this.career.musicVol - 10); this.updateSettingsPanel(doc); this.saveStats(); });
+      this.clickHandler(doc, 'btn-master-up', () => {
+        this.career.masterVol = Math.min(100, this.career.masterVol + 10);
+        globalMasterVol = this.career.masterVol / 100;
+        this.updateSettingsPanel(doc); this.saveStats();
+      });
+      this.clickHandler(doc, 'btn-master-down', () => {
+        this.career.masterVol = Math.max(0, this.career.masterVol - 10);
+        globalMasterVol = this.career.masterVol / 100;
+        this.updateSettingsPanel(doc); this.saveStats();
+      });
+      this.clickHandler(doc, 'btn-sfx-up', () => {
+        this.career.sfxVol = Math.min(100, this.career.sfxVol + 10);
+        globalSfxVol = this.career.sfxVol / 100;
+        this.updateSettingsPanel(doc); this.saveStats();
+      });
+      this.clickHandler(doc, 'btn-sfx-down', () => {
+        this.career.sfxVol = Math.max(0, this.career.sfxVol - 10);
+        globalSfxVol = this.career.sfxVol / 100;
+        this.updateSettingsPanel(doc); this.saveStats();
+      });
+      this.clickHandler(doc, 'btn-music-up', () => {
+        this.career.musicVol = Math.min(100, this.career.musicVol + 10);
+        this.updateSettingsPanel(doc); this.saveStats();
+        const musicVol = (this.career.masterVol / 100) * (this.career.musicVol / 100) * 0.06;
+        if (this.ambientMusic.isPlaying()) this.ambientMusic.setVolume(musicVol);
+      });
+      this.clickHandler(doc, 'btn-music-down', () => {
+        this.career.musicVol = Math.max(0, this.career.musicVol - 10);
+        this.updateSettingsPanel(doc); this.saveStats();
+        const musicVol = (this.career.masterVol / 100) * (this.career.musicVol / 100) * 0.06;
+        if (this.ambientMusic.isPlaying()) this.ambientMusic.setVolume(musicVol);
+      });
       this.clickHandler(doc, 'btn-theme-prev', () => {
         this.career.laneTheme = (this.career.laneTheme - 1 + LANE_THEMES.length) % LANE_THEMES.length;
+        this.themeManager.applyTheme(this.career.laneTheme);
         this.updateSettingsPanel(doc);
         this.saveStats();
         this.showToast('Theme: ' + LANE_THEMES[this.career.laneTheme].name);
       });
       this.clickHandler(doc, 'btn-theme-next', () => {
         this.career.laneTheme = (this.career.laneTheme + 1) % LANE_THEMES.length;
+        this.themeManager.applyTheme(this.career.laneTheme);
         this.updateSettingsPanel(doc);
         this.saveStats();
         this.showToast('Theme: ' + LANE_THEMES[this.career.laneTheme].name);
+      });
+      this.clickHandler(doc, 'btn-oil-prev', () => {
+        this.career.oilPattern = (this.career.oilPattern - 1 + OIL_PATTERNS.length) % OIL_PATTERNS.length;
+        this.currentOilPattern = OIL_PATTERNS[this.career.oilPattern];
+        this.updateSettingsPanel(doc);
+        this.saveStats();
+        this.showToast('Oil: ' + this.currentOilPattern.name + ' - ' + this.currentOilPattern.desc);
+      });
+      this.clickHandler(doc, 'btn-oil-next', () => {
+        this.career.oilPattern = (this.career.oilPattern + 1) % OIL_PATTERNS.length;
+        this.currentOilPattern = OIL_PATTERNS[this.career.oilPattern];
+        this.updateSettingsPanel(doc);
+        this.saveStats();
+        this.showToast('Oil: ' + this.currentOilPattern.name + ' - ' + this.currentOilPattern.desc);
       });
       this.clickHandler(doc, 'btn-bumpers', () => {
         this.career.bumpers = !this.career.bumpers;
@@ -685,6 +769,7 @@ export class BowlingSystem extends createSystem({
         this.clickHandler(doc, 's' + (i + 1), () => {
           this.career.selectedBall = idx;
           this.ballsUsed.add(idx);
+          this.career.ballsUsed = Array.from(this.ballsUsed);
           this.updateBallSkin();
           this.saveStats();
           sfxSelect();
@@ -761,6 +846,7 @@ export class BowlingSystem extends createSystem({
 
     this.ballGroup.visible = false;
     this.pinGroup.visible = (name === 'title');
+    if (name !== 'title') this.oilVisual.hide();
 
     // Refresh panel data
     if (name === 'stats') {
@@ -802,6 +888,11 @@ export class BowlingSystem extends createSystem({
   private startGame(mode: GameMode) {
     this.mode = mode;
     this.modesPlayed.add(mode);
+    // Persist modes played
+    this.career.modesPlayed = Array.from(this.modesPlayed);
+    this.career.ballsUsed = Array.from(this.ballsUsed);
+    this.saveStats();
+
     this.frame = 1;
     this.throwNum = 1;
     this.throws = [];
@@ -817,6 +908,10 @@ export class BowlingSystem extends createSystem({
     this.speedModeTimer = 60;
     this.speedModePins = 0;
     this.sweepPending = false;
+
+    // Set oil pattern for the game
+    this.currentOilPattern = OIL_PATTERNS[this.career.oilPattern] || OIL_PATTERNS[0];
+    this.oilVisual.show(this.currentOilPattern, LANE_W);
 
     // Clear effects
     this.particles.clear();
@@ -913,6 +1008,7 @@ export class BowlingSystem extends createSystem({
     this.particles.update(dt);
     this.ballTrail.update(dt);
     this.pinSweep.update(dt);
+    this.themeManager.update(dt);
     const isAiming = this.state === GameState.AIMING || this.state === GameState.CHARGING;
     this.floorArrows.update(dt, isAiming);
 
@@ -1078,8 +1174,9 @@ export class BowlingSystem extends createSystem({
   // ══════════════════════════════════════════════════════════
 
   private updateBallPhysics(dt: number) {
-    // Apply spin curve (lateral acceleration)
-    this.ballVelX += this.spinAmount * SPIN_CURVE_FACTOR * dt;
+    // Apply spin curve with oil pattern modifier
+    const oilMul = getOilSpinMultiplier(this.currentOilPattern, this.ballZ, this.ballX, LANE_W);
+    this.ballVelX += this.spinAmount * SPIN_CURVE_FACTOR * dt * oilMul;
 
     // Move ball
     this.ballX += this.ballVelX * dt;
@@ -1465,6 +1562,7 @@ export class BowlingSystem extends createSystem({
     this.ambientMusic.stop();
     this.aimGuide.hide();
     this.ballTrail.clear();
+    this.oilVisual.hide();
 
     let finalScore = this.totalScore;
     if (this.mode === GameMode.SPEED) {
@@ -1587,6 +1685,28 @@ export class BowlingSystem extends createSystem({
         unlocked = this.lastPower >= 99;
       } else if (ach.id === 'tournament_win') {
         unlocked = this.mode === GameMode.TOURNAMENT && this.totalScore >= 200;
+      } else if (ach.id === 'oil_master') {
+        unlocked = (this.career.oilPattern === 1) && this.totalScore >= 150; // Sport pattern
+      } else if (ach.id === 'all_patterns') {
+        // Check if career.modesPlayed on each pattern — simplified: check if they've played 5+ games
+        unlocked = false; // needs pattern tracking, skip for now
+      } else if (ach.id === 'all_themes') {
+        unlocked = false; // needs theme tracking, skip for now
+      } else if (ach.id === 'three_turkeys') {
+        // Check if gameStrikes >= 9 (3 turkeys = 9 consecutive strikes)
+        unlocked = this.gameStrikes >= 9;
+      } else if (ach.id === 'no_open_frames') {
+        // All frames have strike or spare
+        let allMarked = this.frame >= 10;
+        if (allMarked) {
+          for (let f = 0; f < 10; f++) {
+            const marks = this.frameMarks[f];
+            const hasStrike = marks.includes('X');
+            const hasSpare = marks.includes('/');
+            if (!hasStrike && !hasSpare) { allMarked = false; break; }
+          }
+        }
+        unlocked = allMarked;
       } else if (ach.id === 'first_spare_no_guide') {
         // 7-10 split spare: check if frame had pins 7 and 10 standing alone
         unlocked = false; // complex - skip for now
@@ -1620,6 +1740,9 @@ export class BowlingSystem extends createSystem({
 
     const standingPins = this.pinStanding.filter(s => s).length;
     this.setText(d, 'pins-label', standingPins + ' pins');
+
+    // Pin diagram
+    this.setText(d, 'pin-diagram', getPinDiagram(this.pinStanding));
 
     // Combo text with color
     let combo = ' ';
@@ -1746,7 +1869,7 @@ export class BowlingSystem extends createSystem({
     const unlocked = this.career.unlockedAchievements;
 
     this.setText(doc, 'ach-count', unlocked.length + ' / ' + ACHIEVEMENTS.length + ' unlocked');
-    this.setText(doc, 'page-label', (this.achPage + 1) + '/4');
+    this.setText(doc, 'page-label', (this.achPage + 1) + '/5');
 
     for (let i = 0; i < perPage; i++) {
       const achIdx = start + i;
@@ -1777,12 +1900,13 @@ export class BowlingSystem extends createSystem({
     this.setText(doc, 'stat-perfects', '' + s.perfectGames);
     this.setText(doc, 'stat-throws', '' + s.totalThrows);
     this.setText(doc, 'stat-pins', '' + s.totalPins);
-    const rate = s.totalThrows > 0 ? ((s.totalStrikes / s.totalThrows) * 100).toFixed(0) : '0';
-    this.setText(doc, 'stat-strike-rate', rate + '%');
+    const pinsPerThrow = s.totalThrows > 0 ? (s.totalPins / s.totalThrows).toFixed(1) : '0.0';
+    this.setText(doc, 'stat-strike-rate', pinsPerThrow + ' avg');
     const avg = s.gamesPlayed > 0 ? Math.round(s.totalScore / s.gamesPlayed) : 0;
     this.setText(doc, 'stat-avg', '' + avg);
     this.setText(doc, 'stat-streak', '' + s.bestStreak);
     this.setText(doc, 'stat-level', s.level + ' - ' + this.getLevelName());
+    this.setText(doc, 'stat-ach-count', s.unlockedAchievements.length + '/' + ACHIEVEMENTS.length);
   }
 
   private updateSettingsPanel(doc: UIKitDocument) {
@@ -1796,6 +1920,8 @@ export class BowlingSystem extends createSystem({
     if (bumperEl) {
       bumperEl.setProperties({ color: this.career.bumpers ? '#00ff88' : '#ff4444' });
     }
+    const oil = OIL_PATTERNS[this.career.oilPattern] || OIL_PATTERNS[0];
+    this.setText(doc, 'oil-name', oil.name);
   }
 
   // ── Helpers ──

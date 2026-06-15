@@ -547,6 +547,132 @@ export function buildSideLanes(parent: Object3D, laneLen: number) {
 }
 
 // ══════════════════════════════════════════════════════════════
+// Lane Theme Manager
+// ══════════════════════════════════════════════════════════════
+
+export class LaneThemeManager {
+  private scene: Object3D;
+  private currentTheme = 0;
+  private pulseTime = 0;
+  private pulseLights: { light: any; baseIntensity: number; phase: number }[] = [];
+
+  constructor(scene: Object3D) {
+    this.scene = scene;
+  }
+
+  applyTheme(themeIndex: number) {
+    this.currentTheme = themeIndex;
+    const theme = LANE_THEMES[themeIndex] || LANE_THEMES[0];
+
+    // Update scene background and fog
+    if ((this.scene as any).background) {
+      (this.scene as any).background.setHex(theme.bgColor);
+    }
+    if ((this.scene as any).fog) {
+      (this.scene as any).fog.color.setHex(theme.fogColor);
+    }
+  }
+
+  registerPulseLight(light: any, baseIntensity: number, phase: number) {
+    this.pulseLights.push({ light, baseIntensity, phase });
+  }
+
+  update(dt: number) {
+    this.pulseTime += dt;
+    for (const pl of this.pulseLights) {
+      const pulse = Math.sin(this.pulseTime * 1.5 + pl.phase) * 0.12 + 1.0;
+      pl.light.intensity = pl.baseIntensity * pulse;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Oil Pattern System
+// ══════════════════════════════════════════════════════════════
+
+export interface OilPattern {
+  name: string;
+  desc: string;
+  length: number;
+  slickness: number;
+  crown: number;
+}
+
+export const OIL_PATTERNS: OilPattern[] = [
+  { name: 'House', desc: 'Beginner-friendly', length: 10, slickness: 0.3, crown: 0.7 },
+  { name: 'Sport', desc: 'Flat and challenging', length: 12, slickness: 0.5, crown: 0.2 },
+  { name: 'Cheetah', desc: 'Short and fast', length: 6, slickness: 0.6, crown: 0.4 },
+  { name: 'Shark', desc: 'Long and heavy', length: 15, slickness: 0.7, crown: 0.5 },
+  { name: 'Dry', desc: 'No oil, max hook', length: 0, slickness: 0.0, crown: 0.0 },
+];
+
+export function getOilSpinMultiplier(pattern: OilPattern, ballZ: number, ballX: number, laneWidth: number): number {
+  if (ballZ > 0) return 1.0;
+  const distFromFoul = Math.abs(ballZ);
+  if (distFromFoul < pattern.length) {
+    const lateralPos = Math.abs(ballX) / (laneWidth / 2);
+    const crownMul = 1 - pattern.crown * (1 - lateralPos);
+    return 1 - (pattern.slickness * crownMul);
+  }
+  const pastOil = distFromFoul - pattern.length;
+  const transition = Math.min(1, pastOil / 2);
+  return 1 - (pattern.slickness * (1 - transition));
+}
+
+// ══════════════════════════════════════════════════════════════
+// Pin Standing Diagram
+// ══════════════════════════════════════════════════════════════
+
+export function getPinDiagram(standing: boolean[]): string {
+  const s = (i: number) => standing[i] ? 'O' : '.';
+  return (
+    s(6) + ' ' + s(7) + ' ' + s(8) + ' ' + s(9) + '\n' +
+    ' ' + s(3) + ' ' + s(4) + ' ' + s(5) + '\n' +
+    '  ' + s(1) + ' ' + s(2) + '\n' +
+    '   ' + s(0)
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// Oil Pattern Visualizer
+// ══════════════════════════════════════════════════════════════
+
+export class OilPatternVisual {
+  private mesh: Mesh;
+  private visible = false;
+
+  constructor(parent: Object3D, laneWidth: number) {
+    const geo = new PlaneGeometry(laneWidth, 1);
+    const mat = new MeshBasicMaterial({
+      color: 0x224488,
+      transparent: true,
+      opacity: 0.06,
+      side: DoubleSide,
+    });
+    this.mesh = new Mesh(geo, mat);
+    this.mesh.rotation.x = -Math.PI / 2;
+    this.mesh.position.set(0, 0.003, 0);
+    this.mesh.visible = false;
+    parent.add(this.mesh);
+  }
+
+  show(pattern: OilPattern, laneWidth: number) {
+    if (pattern.length <= 0) {
+      this.mesh.visible = false;
+      return;
+    }
+    this.mesh.scale.set(1, pattern.length, 1);
+    this.mesh.position.z = -pattern.length / 2;
+    this.mesh.visible = true;
+    (this.mesh.material as MeshBasicMaterial).opacity = 0.04 + pattern.slickness * 0.06;
+  }
+
+  hide() {
+    this.mesh.visible = false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
 // Animated Floor Arrows
 // ══════════════════════════════════════════════════════════════
 

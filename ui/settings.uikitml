@@ -1,6 +1,6 @@
-<container flexDirection="column" alignItems="center" gap="8" padding="12">
+<container flexDirection="column" alignItems="center" gap="6" padding="12">
   <text fontSize="24" fontWeight="bold" color="#00ffff">SETTINGS</text>
-  <container flexDirection="column" gap="6" width="300">
+  <container flexDirection="column" gap="5" width="300">
     <container flexDirection="row" justifyContent="space-between" alignItems="center">
       <text fontSize="14" color="#888888">Master Volume</text>
       <container flexDirection="row" gap="4" alignItems="center">
@@ -31,6 +31,14 @@
         <text name="btn-theme-prev" fontSize="16" color="#00cccc" backgroundColor="#003333" padding="4" borderRadius="2">&lt;</text>
         <text name="theme-name" fontSize="14" color="#ffffff" width="90" textAlign="center">Neon Blue</text>
         <text name="btn-theme-next" fontSize="16" color="#00cccc" backgroundColor="#003333" padding="4" borderRadius="2">&gt;</text>
+      </container>
+    </container>
+    <container flexDirection="row" justifyContent="space-between" alignItems="center">
+      <text fontSize="14" color="#888888">Oil Pattern</text>
+      <container flexDirection="row" gap="4" alignItems="center">
+        <text name="btn-oil-prev" fontSize="16" color="#00cccc" backgroundColor="#003333" padding="4" borderRadius="2">&lt;</text>
+        <text name="oil-name" fontSize="14" color="#ffffff" width="90" textAlign="center">House</text>
+        <text name="btn-oil-next" fontSize="16" color="#00cccc" backgroundColor="#003333" padding="4" borderRadius="2">&gt;</text>
       </container>
     </container>
     <container flexDirection="row" justifyContent="space-between" alignItems="center">

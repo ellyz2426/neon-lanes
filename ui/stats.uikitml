@@ -9,10 +9,11 @@
     <container flexDirection="row" justifyContent="space-between"><text fontSize="14" color="#888888">Perfect Games</text><text name="stat-perfects" fontSize="14" color="#ffff00">0</text></container>
     <container flexDirection="row" justifyContent="space-between"><text fontSize="14" color="#888888">Total Throws</text><text name="stat-throws" fontSize="14" color="#ffffff">0</text></container>
     <container flexDirection="row" justifyContent="space-between"><text fontSize="14" color="#888888">Total Pins</text><text name="stat-pins" fontSize="14" color="#ffffff">0</text></container>
-    <container flexDirection="row" justifyContent="space-between"><text fontSize="14" color="#888888">Strike Rate</text><text name="stat-strike-rate" fontSize="14" color="#ff00ff">0%</text></container>
+    <container flexDirection="row" justifyContent="space-between"><text fontSize="14" color="#888888">Pins/Throw</text><text name="stat-strike-rate" fontSize="14" color="#ff00ff">0.0 avg</text></container>
     <container flexDirection="row" justifyContent="space-between"><text fontSize="14" color="#888888">Avg Score</text><text name="stat-avg" fontSize="14" color="#00ffff">0</text></container>
     <container flexDirection="row" justifyContent="space-between"><text fontSize="14" color="#888888">Best Streak</text><text name="stat-streak" fontSize="14" color="#ffff00">0</text></container>
     <container flexDirection="row" justifyContent="space-between"><text fontSize="14" color="#888888">Level</text><text name="stat-level" fontSize="14" color="#00ffff">1 - Rookie</text></container>
+    <container flexDirection="row" justifyContent="space-between"><text fontSize="14" color="#888888">Achievements</text><text name="stat-ach-count" fontSize="14" color="#ffcc00">0/61</text></container>
   </container>
   <text name="btn-back" fontSize="16" color="#888888" backgroundColor="#222222" padding="6" borderRadius="4" width="120" textAlign="center">BACK</text>
 </container>

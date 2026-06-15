@@ -94,10 +94,10 @@
                 "type": "custom",
                 "children": [],
                 "properties": {
-                  "name": "combo-label",
-                  "fontsize": "14",
-                  "fontweight": "bold",
-                  "color": "#ff00ff"
+                  "name": "pin-diagram",
+                  "fontsize": "8",
+                  "color": "#ffcc00",
+                  "fontfamily": "monospace"
                 },
                 "dataUid": "uid-10"
               }
@@ -117,6 +117,18 @@
         "dataUid": "uid-6"
       },
       {
+        "sourceTag": "text",
+        "type": "custom",
+        "children": [],
+        "properties": {
+          "name": "combo-label",
+          "fontsize": "14",
+          "fontweight": "bold",
+          "color": "#ff00ff"
+        },
+        "dataUid": "uid-11"
+      },
+      {
         "sourceTag": "container",
         "type": "custom",
         "children": [
@@ -129,7 +141,7 @@
               "fontsize": "14",
               "color": "#ffff00"
             },
-            "dataUid": "uid-12"
+            "dataUid": "uid-13"
           },
           {
             "sourceTag": "text",
@@ -140,7 +152,7 @@
               "fontsize": "10",
               "color": "#666666"
             },
-            "dataUid": "uid-13"
+            "dataUid": "uid-14"
           }
         ],
         "properties": {
@@ -148,7 +160,7 @@
           "gap": "8",
           "alignitems": "center"
         },
-        "dataUid": "uid-11"
+        "dataUid": "uid-12"
       }
     ],
     "properties": {
@@ -167,7 +179,7 @@
         "column": 0
       },
       "end": {
-        "line": 17,
+        "line": 18,
         "column": 12
       }
     },
@@ -258,7 +270,7 @@
       },
       "end": {
         "line": 10,
-        "column": 87
+        "column": 91
       }
     },
     "uid-11": {
@@ -267,18 +279,18 @@
         "column": 2
       },
       "end": {
-        "line": 16,
-        "column": 14
+        "line": 13,
+        "column": 83
       }
     },
     "uid-12": {
       "start": {
         "line": 14,
-        "column": 4
+        "column": 2
       },
       "end": {
-        "line": 14,
-        "column": 66
+        "line": 17,
+        "column": 14
       }
     },
     "uid-13": {
@@ -288,6 +300,16 @@
       },
       "end": {
         "line": 15,
+        "column": 66
+      }
+    },
+    "uid-14": {
+      "start": {
+        "line": 16,
+        "column": 4
+      },
+      "end": {
+        "line": 16,
         "column": 64
       }
     }

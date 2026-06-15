@@ -316,7 +316,7 @@
                 "sourceTag": "text",
                 "type": "custom",
                 "children": [
-                  "Strike Rate"
+                  "Pins/Throw"
                 ],
                 "properties": {
                   "fontsize": "14",
@@ -328,7 +328,7 @@
                 "sourceTag": "text",
                 "type": "custom",
                 "children": [
-                  "0%"
+                  "0.0 avg"
                 ],
                 "properties": {
                   "name": "stat-strike-rate",
@@ -451,6 +451,42 @@
               "justifycontent": "space-between"
             },
             "dataUid": "uid-37"
+          },
+          {
+            "sourceTag": "container",
+            "type": "custom",
+            "children": [
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "Achievements"
+                ],
+                "properties": {
+                  "fontsize": "14",
+                  "color": "#888888"
+                },
+                "dataUid": "uid-41"
+              },
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "0/61"
+                ],
+                "properties": {
+                  "name": "stat-ach-count",
+                  "fontsize": "14",
+                  "color": "#ffcc00"
+                },
+                "dataUid": "uid-42"
+              }
+            ],
+            "properties": {
+              "flexdirection": "row",
+              "justifycontent": "space-between"
+            },
+            "dataUid": "uid-40"
           }
         ],
         "properties": {
@@ -476,7 +512,7 @@
           "width": "120",
           "textalign": "center"
         },
-        "dataUid": "uid-40"
+        "dataUid": "uid-43"
       }
     ],
     "properties": {
@@ -495,7 +531,7 @@
         "column": 0
       },
       "end": {
-        "line": 17,
+        "line": 18,
         "column": 12
       }
     },
@@ -515,7 +551,7 @@
         "column": 2
       },
       "end": {
-        "line": 15,
+        "line": 16,
         "column": 14
       }
     },
@@ -766,7 +802,7 @@
       },
       "end": {
         "line": 11,
-        "column": 201
+        "column": 205
       }
     },
     "uid-29": {
@@ -776,17 +812,17 @@
       },
       "end": {
         "line": 11,
-        "column": 120
+        "column": 119
       }
     },
     "uid-30": {
       "start": {
         "line": 11,
-        "column": 120
+        "column": 119
       },
       "end": {
         "line": 11,
-        "column": 189
+        "column": 193
       }
     },
     "uid-31": {
@@ -881,11 +917,41 @@
     },
     "uid-40": {
       "start": {
-        "line": 16,
+        "line": 15,
+        "column": 4
+      },
+      "end": {
+        "line": 15,
+        "column": 202
+      }
+    },
+    "uid-41": {
+      "start": {
+        "line": 15,
+        "column": 66
+      },
+      "end": {
+        "line": 15,
+        "column": 121
+      }
+    },
+    "uid-42": {
+      "start": {
+        "line": 15,
+        "column": 121
+      },
+      "end": {
+        "line": 15,
+        "column": 190
+      }
+    },
+    "uid-43": {
+      "start": {
+        "line": 17,
         "column": 2
       },
       "end": {
-        "line": 16,
+        "line": 17,
         "column": 151
       }
     }

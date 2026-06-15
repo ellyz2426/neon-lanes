@@ -360,13 +360,96 @@
                 "sourceTag": "text",
                 "type": "custom",
                 "children": [
-                  "Gutter Bumpers"
+                  "Oil Pattern"
                 ],
                 "properties": {
                   "fontsize": "14",
                   "color": "#888888"
                 },
                 "dataUid": "uid-29"
+              },
+              {
+                "sourceTag": "container",
+                "type": "custom",
+                "children": [
+                  {
+                    "sourceTag": "text",
+                    "type": "custom",
+                    "children": [
+                      "<"
+                    ],
+                    "properties": {
+                      "name": "btn-oil-prev",
+                      "fontsize": "16",
+                      "color": "#00cccc",
+                      "backgroundcolor": "#003333",
+                      "padding": "4",
+                      "borderradius": "2"
+                    },
+                    "dataUid": "uid-31"
+                  },
+                  {
+                    "sourceTag": "text",
+                    "type": "custom",
+                    "children": [
+                      "House"
+                    ],
+                    "properties": {
+                      "name": "oil-name",
+                      "fontsize": "14",
+                      "color": "#ffffff",
+                      "width": "90",
+                      "textalign": "center"
+                    },
+                    "dataUid": "uid-32"
+                  },
+                  {
+                    "sourceTag": "text",
+                    "type": "custom",
+                    "children": [
+                      ">"
+                    ],
+                    "properties": {
+                      "name": "btn-oil-next",
+                      "fontsize": "16",
+                      "color": "#00cccc",
+                      "backgroundcolor": "#003333",
+                      "padding": "4",
+                      "borderradius": "2"
+                    },
+                    "dataUid": "uid-33"
+                  }
+                ],
+                "properties": {
+                  "flexdirection": "row",
+                  "gap": "4",
+                  "alignitems": "center"
+                },
+                "dataUid": "uid-30"
+              }
+            ],
+            "properties": {
+              "flexdirection": "row",
+              "justifycontent": "space-between",
+              "alignitems": "center"
+            },
+            "dataUid": "uid-28"
+          },
+          {
+            "sourceTag": "container",
+            "type": "custom",
+            "children": [
+              {
+                "sourceTag": "text",
+                "type": "custom",
+                "children": [
+                  "Gutter Bumpers"
+                ],
+                "properties": {
+                  "fontsize": "14",
+                  "color": "#888888"
+                },
+                "dataUid": "uid-35"
               },
               {
                 "sourceTag": "text",
@@ -384,7 +467,7 @@
                   "width": "50",
                   "textalign": "center"
                 },
-                "dataUid": "uid-30"
+                "dataUid": "uid-36"
               }
             ],
             "properties": {
@@ -392,7 +475,7 @@
               "justifycontent": "space-between",
               "alignitems": "center"
             },
-            "dataUid": "uid-28"
+            "dataUid": "uid-34"
           },
           {
             "sourceTag": "text",
@@ -409,12 +492,12 @@
               "borderradius": "4",
               "textalign": "center"
             },
-            "dataUid": "uid-31"
+            "dataUid": "uid-37"
           }
         ],
         "properties": {
           "flexdirection": "column",
-          "gap": "6",
+          "gap": "5",
           "width": "300"
         },
         "dataUid": "uid-3"
@@ -435,13 +518,13 @@
           "width": "120",
           "textalign": "center"
         },
-        "dataUid": "uid-32"
+        "dataUid": "uid-38"
       }
     ],
     "properties": {
       "flexdirection": "column",
       "alignitems": "center",
-      "gap": "8",
+      "gap": "6",
       "padding": "12"
     },
     "dataUid": "uid-1"
@@ -454,7 +537,7 @@
         "column": 0
       },
       "end": {
-        "line": 42,
+        "line": 50,
         "column": 12
       }
     },
@@ -474,7 +557,7 @@
         "column": 2
       },
       "end": {
-        "line": 40,
+        "line": 48,
         "column": 14
       }
     },
@@ -724,7 +807,7 @@
         "column": 4
       },
       "end": {
-        "line": 38,
+        "line": 42,
         "column": 16
       }
     },
@@ -735,7 +818,7 @@
       },
       "end": {
         "line": 36,
-        "column": 63
+        "column": 60
       }
     },
     "uid-30": {
@@ -744,27 +827,87 @@
         "column": 6
       },
       "end": {
-        "line": 37,
-        "column": 156
+        "line": 41,
+        "column": 18
       }
     },
     "uid-31": {
       "start": {
-        "line": 39,
-        "column": 4
+        "line": 38,
+        "column": 8
       },
       "end": {
-        "line": 39,
-        "column": 162
+        "line": 38,
+        "column": 130
       }
     },
     "uid-32": {
       "start": {
-        "line": 41,
+        "line": 39,
+        "column": 8
+      },
+      "end": {
+        "line": 39,
+        "column": 102
+      }
+    },
+    "uid-33": {
+      "start": {
+        "line": 40,
+        "column": 8
+      },
+      "end": {
+        "line": 40,
+        "column": 130
+      }
+    },
+    "uid-34": {
+      "start": {
+        "line": 43,
+        "column": 4
+      },
+      "end": {
+        "line": 46,
+        "column": 16
+      }
+    },
+    "uid-35": {
+      "start": {
+        "line": 44,
+        "column": 6
+      },
+      "end": {
+        "line": 44,
+        "column": 63
+      }
+    },
+    "uid-36": {
+      "start": {
+        "line": 45,
+        "column": 6
+      },
+      "end": {
+        "line": 45,
+        "column": 156
+      }
+    },
+    "uid-37": {
+      "start": {
+        "line": 47,
+        "column": 4
+      },
+      "end": {
+        "line": 47,
+        "column": 162
+      }
+    },
+    "uid-38": {
+      "start": {
+        "line": 49,
         "column": 2
       },
       "end": {
-        "line": 41,
+        "line": 49,
         "column": 151
       }
     }
