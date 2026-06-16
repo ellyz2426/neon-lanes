@@ -42,6 +42,8 @@ import {
   PocketTarget,
   LaneWear,
   ScorePopup,
+  ReactiveEnvironment,
+  TitleDemo,
 } from './effects.js';
 
 // ══════════════════════════════════════════════════════════════
@@ -188,6 +190,7 @@ interface CareerStats {
   washouts: number;
   cleanGames: number;
   bestSpareStreak: number;
+  dailyGamesCount: number;
 }
 
 const DEFAULT_STATS: CareerStats = {
@@ -201,7 +204,7 @@ const DEFAULT_STATS: CareerStats = {
   oilPattern: 0, modesPlayed: [], ballsUsed: [0],
   patternsUsed: [0], themesUsed: [0], splitConversions: 0,
   totalGutters: 0, brooklyns: 0, washouts: 0,
-  cleanGames: 0, bestSpareStreak: 0,
+  cleanGames: 0, bestSpareStreak: 0, dailyGamesCount: 0,
 };
 
 // ── Achievements ──────────────────────────────────────────────
@@ -311,6 +314,22 @@ const ACHIEVEMENTS: Achievement[] = [
   { id: 'total_spares_100', name: 'Spare Hoarder', desc: '100 career spares', check: s => s.totalSpares >= 100 },
   { id: 'wear_master', name: 'Lane Reader', desc: 'Win on a worn lane (10+ frames played)', check: () => false },
   { id: 'pocket_precision', name: 'Pocket Perfect', desc: '5 consecutive pocket strikes', check: () => false },
+  // Round 7 achievements (115 total)
+  { id: 'speed_100', name: 'Pinfall Machine', desc: '100+ pins in Speed mode', check: () => false },
+  { id: 'zen_200', name: 'Inner Peace', desc: 'Score 200+ in Zen mode', check: () => false },
+  { id: 'practice_300', name: 'Practice Perfect', desc: 'Score 300 in Practice mode', check: () => false },
+  { id: 'daily_7', name: 'Weekly Grind', desc: 'Play Daily mode 7 times', check: () => false },
+  { id: 'avg_over_250', name: 'Elite Average', desc: 'Career average over 250', check: s => s.gamesPlayed >= 10 && (s.totalScore / s.gamesPlayed) >= 250 },
+  { id: 'total_spares_200', name: 'Spare Obsession', desc: '200 career spares', check: s => s.totalSpares >= 200 },
+  { id: 'strikes_500', name: 'Five Hundred Club', desc: '500 career strikes', check: s => s.totalStrikes >= 500 },
+  { id: 'games_1000', name: 'True Addict', desc: 'Play 1000 games', check: s => s.gamesPlayed >= 1000 },
+  { id: 'score_total_100k', name: 'Immortal', desc: '100000 total career score', check: s => s.totalScore >= 100000 },
+  { id: 'six_pack', name: 'Six Pack', desc: '6 strikes in a row', check: s => s.bestStreak >= 6 },
+  { id: 'seven_bagger', name: 'Seven Bagger', desc: '7 strikes in a row', check: s => s.bestStreak >= 7 },
+  { id: 'ten_perfects', name: 'Perfect Ten', desc: '10 perfect games', check: s => s.perfectGames >= 10 },
+  { id: 'splits_25', name: 'Split Surgeon', desc: 'Convert 25 splits', check: s => s.splitConversions >= 25 },
+  { id: 'clean_25', name: 'Spotless', desc: '25 clean games', check: s => (s.cleanGames || 0) >= 25 },
+  { id: 'brooklyns_25', name: 'Brooklyn Native', desc: '25 Brooklyn strikes', check: s => (s.brooklyns || 0) >= 25 },
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -371,6 +390,20 @@ function sfxAchievement() {
   setTimeout(() => playTone(659, 0.1, 0.15, 'sine'), 100);
   setTimeout(() => playTone(784, 0.15, 0.18, 'sine'), 200);
   setTimeout(() => playTone(1047, 0.2, 0.2, 'sine'), 300);
+}
+function sfxTurkeyStrike() {
+  // Ascending power chord for turkey+
+  setTimeout(() => playTone(330, 0.12, 0.12, 'square'), 350);
+  setTimeout(() => playTone(440, 0.12, 0.12, 'square'), 450);
+  setTimeout(() => playTone(660, 0.15, 0.14, 'square'), 550);
+}
+function sfxEpicStrike() {
+  // Epic fanfare for six pack+
+  setTimeout(() => playTone(392, 0.1, 0.14, 'square'), 350);
+  setTimeout(() => playTone(494, 0.1, 0.14, 'square'), 430);
+  setTimeout(() => playTone(587, 0.1, 0.14, 'square'), 510);
+  setTimeout(() => playTone(784, 0.15, 0.16, 'square'), 600);
+  setTimeout(() => playTone(988, 0.2, 0.18, 'square'), 700);
 }
 
 // ── Keyboard type shim (runtime has keyboard; types expose only XRInputManager) ──
@@ -509,6 +542,12 @@ export class BowlingSystem extends createSystem({
   private laneWear!: LaneWear;
   private scorePopup!: ScorePopup;
   private gameTurkeys = 0; // count of turkeys in current game
+  private pocketStrikes = 0; // consecutive pocket strikes for achievement
+
+  // Round 7 additions
+  private reactiveEnv!: ReactiveEnvironment;
+  private titleDemo!: TitleDemo;
+  private dailyGamesCount = 0; // persisted daily game count
 
   /** Access keyboard via the runtime InputManager (not exposed in types) */
   private _kb(): KeyboardLike {
@@ -560,6 +599,11 @@ export class BowlingSystem extends createSystem({
     this.pocketTarget = new PocketTarget(this.world.scene);
     this.laneWear = new LaneWear();
     this.scorePopup = new ScorePopup(this.world.scene);
+
+    // Round 7 effects
+    this.reactiveEnv = new ReactiveEnvironment(this.world.scene);
+    this.titleDemo = new TitleDemo(this.world.scene);
+    this.dailyGamesCount = this.career.dailyGamesCount || 0;
 
     this.bindPanels();
   }
@@ -779,7 +823,7 @@ export class BowlingSystem extends createSystem({
       this.achPage = 0;
       this.updateAchievementsPanel(doc);
       this.clickHandler(doc, 'btn-prev', () => { if (this.achPage > 0) { this.achPage--; this.updateAchievementsPanel(doc); } });
-      this.clickHandler(doc, 'btn-next', () => { if (this.achPage < 6) { this.achPage++; this.updateAchievementsPanel(doc); } });
+      this.clickHandler(doc, 'btn-next', () => { if (this.achPage < 7) { this.achPage++; this.updateAchievementsPanel(doc); } });
       this.clickHandler(doc, 'btn-back', () => this.showPanel('title'));
     });
 
@@ -954,6 +998,13 @@ export class BowlingSystem extends createSystem({
     this.pinGroup.visible = (name === 'title');
     if (name !== 'title') this.oilVisual.hide();
 
+    // Title demo
+    if (name === 'title' && this.titleDemo) {
+      this.titleDemo.start();
+    } else if (this.titleDemo) {
+      this.titleDemo.stop();
+    }
+
     // Refresh panel data
     if (name === 'stats') {
       const d = this.getDoc('stats');
@@ -994,6 +1045,11 @@ export class BowlingSystem extends createSystem({
   private startGame(mode: GameMode) {
     this.mode = mode;
     this.modesPlayed.add(mode);
+    // Track daily game count
+    if (mode === GameMode.DAILY) {
+      this.dailyGamesCount++;
+      this.career.dailyGamesCount = this.dailyGamesCount;
+    }
     // Persist modes played
     this.career.modesPlayed = Array.from(this.modesPlayed);
     this.career.ballsUsed = Array.from(this.ballsUsed);
@@ -1144,6 +1200,12 @@ export class BowlingSystem extends createSystem({
     this.floorArrows.update(dt, isAiming);
     this.pinGlow.update(dt, this.pinMeshes, this.pinStanding, isAiming);
     this.pocketTarget.update(dt, isAiming);
+    this.reactiveEnv.update(dt);
+
+    // Title demo
+    if (this.state === GameState.MENU) {
+      this.titleDemo.update(dt);
+    }
 
     switch (this.state) {
       case GameState.COUNTDOWN:
@@ -1600,6 +1662,11 @@ export class BowlingSystem extends createSystem({
       this.triggerShake(0.06, 0.4);
       this.triggerHaptic(1.0, 200);
       sfxStrike();
+      // Reactive environment flash
+      if (this.reactiveEnv) this.reactiveEnv.flash(0xffcc00, 1.0);
+      // Varied strike sounds by streak
+      if (this.currentStreak >= 6) sfxEpicStrike();
+      else if (this.currentStreak >= 3) sfxTurkeyStrike();
       const streakMsg = this.isBrooklyn
         ? 'BROOKLYN STRIKE!'
         : getStreakName(this.currentStreak);
@@ -1630,6 +1697,8 @@ export class BowlingSystem extends createSystem({
       this.triggerShake(0.03, 0.25);
       this.triggerHaptic(0.6, 150);
       sfxSpare();
+      // Reactive environment flash
+      if (this.reactiveEnv) this.reactiveEnv.flash(0x00ffff, 0.6);
 
       // Check for washout conversion
       if (this.isWashout) {
@@ -2033,6 +2102,14 @@ export class BowlingSystem extends createSystem({
       } else if (ach.id === 'pocket_precision') {
         // 5 consecutive pocket strikes (strikes where ball hit ideal zone)
         unlocked = this.currentStreak >= 5;
+      } else if (ach.id === 'speed_100') {
+        unlocked = this.mode === GameMode.SPEED && this.speedModePins >= 100;
+      } else if (ach.id === 'zen_200') {
+        unlocked = this.mode === GameMode.ZEN && this.totalScore >= 200;
+      } else if (ach.id === 'practice_300') {
+        unlocked = this.mode === GameMode.PRACTICE && this.totalScore >= 300;
+      } else if (ach.id === 'daily_7') {
+        unlocked = this.mode === GameMode.DAILY && this.dailyGamesCount >= 7;
       } else if (ach.id === 'no_open_frames') {
         // All frames have strike or spare
         let allMarked = this.frame >= 10;
@@ -2219,7 +2296,7 @@ export class BowlingSystem extends createSystem({
     const unlocked = this.career.unlockedAchievements;
 
     this.setText(doc, 'ach-count', unlocked.length + ' / ' + ACHIEVEMENTS.length + ' unlocked');
-    this.setText(doc, 'page-label', (this.achPage + 1) + '/7');
+    this.setText(doc, 'page-label', (this.achPage + 1) + '/8');
 
     for (let i = 0; i < perPage; i++) {
       const achIdx = start + i;

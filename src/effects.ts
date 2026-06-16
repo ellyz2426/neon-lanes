@@ -1147,6 +1147,223 @@ export class ScorePopup {
 }
 
 // ══════════════════════════════════════════════════════════════
+// Spectator Silhouettes
+// ══════════════════════════════════════════════════════════════
+
+export class SpectatorArea {
+  private group: Group;
+  private heads: Mesh[] = [];
+  private time = 0;
+
+  constructor(parent: Object3D) {
+    this.group = new Group();
+    const bodyMat = new MeshStandardMaterial({
+      color: 0x050508,
+      emissive: 0x000000,
+      emissiveIntensity: 0,
+    });
+    const headMat = new MeshStandardMaterial({
+      color: 0x080810,
+      emissive: 0x000811,
+      emissiveIntensity: 0.05,
+    });
+
+    // Seating rows on both sides behind the player
+    for (const side of [-1, 1]) {
+      const baseX = side * 3.0;
+      for (let row = 0; row < 2; row++) {
+        const z = 2 + row * 1.2;
+        const y = 0.4 + row * 0.3;
+        for (let seat = 0; seat < 3; seat++) {
+          const xOff = (seat - 1) * 0.55;
+          // Bench/seat
+          const seatMesh = new Mesh(new BoxGeometry(0.4, 0.05, 0.3), bodyMat);
+          seatMesh.position.set(baseX + xOff, y, z);
+          this.group.add(seatMesh);
+
+          // Body (simple block)
+          if (Math.random() > 0.2) { // 80% occupancy
+            const body = new Mesh(new BoxGeometry(0.22, 0.45, 0.2), bodyMat);
+            body.position.set(baseX + xOff, y + 0.27, z);
+            this.group.add(body);
+
+            // Head
+            const head = new Mesh(new SphereGeometry(0.09, 6, 6), headMat);
+            head.position.set(baseX + xOff, y + 0.55, z);
+            this.group.add(head);
+            this.heads.push(head);
+          }
+        }
+      }
+
+      // Bench backs
+      for (let row = 0; row < 2; row++) {
+        const z = 2.15 + row * 1.2;
+        const y = 0.55 + row * 0.3;
+        const bench = new Mesh(new BoxGeometry(2, 0.5, 0.04), bodyMat);
+        bench.position.set(baseX, y, z);
+        this.group.add(bench);
+      }
+    }
+
+    parent.add(this.group);
+  }
+
+  /** Subtle head sway animation */
+  update(dt: number) {
+    this.time += dt;
+    for (let i = 0; i < this.heads.length; i++) {
+      const phase = i * 1.7;
+      const sway = Math.sin(this.time * 0.3 + phase) * 0.02;
+      this.heads[i].position.x += sway * dt;
+    }
+  }
+
+  /** React to a strike/spare — heads bob */
+  react(intensity: number) {
+    for (const head of this.heads) {
+      head.position.y += 0.03 * intensity;
+      // Will settle back via natural sway
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Reactive Environment Lights (flash on events)
+// ══════════════════════════════════════════════════════════════
+
+export class ReactiveEnvironment {
+  private scene: Object3D;
+  private flashIntensity = 0;
+  private flashColor: Color = new Color(0xffffff);
+  private flashDecay = 3;
+  private neonMaterials: MeshBasicMaterial[] = [];
+
+  constructor(scene: Object3D) {
+    this.scene = scene;
+
+    // Create event-reactive neon strips along walls
+    const stripGeo = new PlaneGeometry(0.05, 16);
+    for (const side of [-1, 1]) {
+      for (const h of [1.5, 2.5]) {
+        const mat = new MeshBasicMaterial({
+          color: 0x003388,
+          transparent: true,
+          opacity: 0.15,
+          blending: AdditiveBlending,
+          side: DoubleSide,
+        });
+        const strip = new Mesh(stripGeo, mat);
+        strip.position.set(side * 3.48, h, -7);
+        strip.rotation.y = side * Math.PI / 2;
+        scene.add(strip);
+        this.neonMaterials.push(mat);
+      }
+    }
+  }
+
+  flash(color: number, intensity = 1) {
+    this.flashIntensity = intensity;
+    this.flashColor.setHex(color);
+  }
+
+  update(dt: number) {
+    if (this.flashIntensity > 0.01) {
+      this.flashIntensity *= Math.exp(-this.flashDecay * dt);
+      for (const mat of this.neonMaterials) {
+        mat.color.copy(this.flashColor);
+        mat.opacity = 0.15 + this.flashIntensity * 0.6;
+      }
+    } else {
+      this.flashIntensity = 0;
+      for (const mat of this.neonMaterials) {
+        mat.color.setHex(0x003388);
+        mat.opacity = 0.15;
+      }
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Title Screen Auto-Demo
+// ══════════════════════════════════════════════════════════════
+
+export class TitleDemo {
+  private active = false;
+  private ballMesh: Mesh;
+  private ballZ = 0.3;
+  private ballX = 0;
+  private ballVelZ = 0;
+  private spin = 0;
+  private timer = 0;
+  private phase: 'idle' | 'rolling' | 'pausing' = 'idle';
+  private pauseTimer = 0;
+
+  constructor(parent: Object3D) {
+    const mat = new MeshStandardMaterial({
+      color: 0x004488,
+      emissive: 0x00bbff,
+      emissiveIntensity: 0.5,
+    });
+    this.ballMesh = new Mesh(new SphereGeometry(0.11, 12, 12), mat);
+    this.ballMesh.position.set(0, 0.111, 0.3);
+    this.ballMesh.visible = false;
+    parent.add(this.ballMesh);
+  }
+
+  start() {
+    this.active = true;
+    this.phase = 'idle';
+    this.timer = 2;
+    this.ballMesh.visible = false;
+  }
+
+  stop() {
+    this.active = false;
+    this.ballMesh.visible = false;
+  }
+
+  update(dt: number): boolean { // returns true if ball hits pin zone
+    if (!this.active) return false;
+
+    if (this.phase === 'idle') {
+      this.timer -= dt;
+      if (this.timer <= 0) {
+        // Launch a demo ball
+        this.phase = 'rolling';
+        this.ballZ = 0.3;
+        this.ballX = (Math.random() - 0.5) * 0.4;
+        this.spin = (Math.random() - 0.5) * 0.8;
+        this.ballVelZ = -(8 + Math.random() * 4);
+        this.ballMesh.visible = true;
+        this.ballMesh.position.set(this.ballX, 0.111, this.ballZ);
+      }
+    } else if (this.phase === 'rolling') {
+      this.ballX += this.spin * 0.7 * dt * dt * 50;
+      this.ballZ += this.ballVelZ * dt;
+      this.ballMesh.position.set(this.ballX, 0.111, this.ballZ);
+      this.ballMesh.rotation.x -= this.ballVelZ * dt / 0.11;
+
+      if (this.ballZ < -17) {
+        this.phase = 'pausing';
+        this.pauseTimer = 3;
+        this.ballMesh.visible = false;
+        return true; // hit pin zone
+      }
+    } else if (this.phase === 'pausing') {
+      this.pauseTimer -= dt;
+      if (this.pauseTimer <= 0) {
+        this.phase = 'idle';
+        this.timer = 1.5 + Math.random() * 2;
+      }
+    }
+    return false;
+  }
+
+  isActive(): boolean { return this.active; }
+}
+
+// ══════════════════════════════════════════════════════════════
 // Animated Floor Arrows
 // ══════════════════════════════════════════════════════════════
 

@@ -25,7 +25,7 @@ import {
 } from '@iwsdk/core';
 
 import { BowlingSystem } from './game-system.js';
-import { buildBackstop, buildNeonSigns, buildSideLanes } from './effects.js';
+import { buildBackstop, buildNeonSigns, buildSideLanes, SpectatorArea } from './effects.js';
 
 async function main() {
   const container = document.getElementById('app') as HTMLDivElement;
@@ -91,6 +91,9 @@ async function main() {
   buildBackstop(world.scene, 1.1, -16);
   buildNeonSigns(world.scene);
   buildSideLanes(world.scene, 18);
+
+  // -- Spectator area (atmospheric silhouettes) --
+  const _spectators = new SpectatorArea(world.scene);
 
   // -- Create panels (all follower-based for VR/browser compatibility) --
   const panels: { config: string; offset: [number, number, number]; speed: number }[] = [
