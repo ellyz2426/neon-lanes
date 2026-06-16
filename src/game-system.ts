@@ -33,6 +33,12 @@ import {
   getOilSpinMultiplier,
   getPinDiagram,
   OilPatternVisual,
+  PinWobble,
+  BallReturn,
+  ScoringMonitor,
+  PinGlow,
+  getStreakName,
+  detectWashout,
 } from './effects.js';
 
 // ══════════════════════════════════════════════════════════════
@@ -174,6 +180,11 @@ interface CareerStats {
   patternsUsed: number[];
   themesUsed: number[];
   splitConversions: number;
+  totalGutters: number;
+  brooklyns: number;
+  washouts: number;
+  cleanGames: number;
+  bestSpareStreak: number;
 }
 
 const DEFAULT_STATS: CareerStats = {
@@ -186,6 +197,8 @@ const DEFAULT_STATS: CareerStats = {
   laneTheme: 0, bumpers: false,
   oilPattern: 0, modesPlayed: [], ballsUsed: [0],
   patternsUsed: [0], themesUsed: [0], splitConversions: 0,
+  totalGutters: 0, brooklyns: 0, washouts: 0,
+  cleanGames: 0, bestSpareStreak: 0,
 };
 
 // ── Achievements ──────────────────────────────────────────────
@@ -268,6 +281,22 @@ const ACHIEVEMENTS: Achievement[] = [
   { id: 'pins_25000', name: 'Pin Apocalypse', desc: '25000 career pins', check: s => s.totalPins >= 25000 },
   { id: 'throws_2000', name: 'Iron Arm', desc: '2000 total throws', check: s => s.totalThrows >= 2000 },
   { id: 'score_total_25k', name: 'Bowling Legend', desc: '25000 total career score', check: s => s.totalScore >= 25000 },
+  // Round 5 achievements (90 total)
+  { id: 'brooklyn', name: 'Brooklyn Style', desc: 'Get a Brooklyn strike', check: s => (s.brooklyns || 0) >= 1 },
+  { id: 'brooklyn_10', name: 'Brooklyn Bridge', desc: '10 Brooklyn strikes', check: s => (s.brooklyns || 0) >= 10 },
+  { id: 'washout', name: 'Washout Warrior', desc: 'Convert a washout to a spare', check: () => false },
+  { id: 'clean_game', name: 'Clean Game', desc: 'No open frames in a full game', check: s => (s.cleanGames || 0) >= 1 },
+  { id: 'clean_5', name: 'Pristine', desc: '5 clean games', check: s => (s.cleanGames || 0) >= 5 },
+  { id: 'spare_streak_7', name: 'Spare Streak 7', desc: '7 spares in a row', check: s => (s.bestSpareStreak || 0) >= 7 },
+  { id: 'gutter_free_50', name: 'Precision Roller', desc: '50 throws with no gutters in a game', check: () => false },
+  { id: 'ten_pin_spare', name: 'Sniper', desc: 'Spare with only the 10-pin standing', check: () => false },
+  { id: 'score_total_50k', name: 'Eternal Bowler', desc: '50000 total career score', check: s => s.totalScore >= 50000 },
+  { id: 'total_gutters_0', name: 'Never Gutter', desc: '100 throws with 0 gutters total', check: s => s.totalThrows >= 100 && (s.totalGutters || 0) === 0 },
+  { id: 'pins_50000', name: 'Pin Extinction', desc: '50000 career pins', check: s => s.totalPins >= 50000 },
+  { id: 'level_75', name: 'Ascended', desc: 'Reach level 75', check: s => s.level >= 75 },
+  { id: 'level_100', name: 'Transcendent', desc: 'Reach level 100', check: s => s.level >= 100 },
+  { id: 'spare_streak_10', name: 'Spare Perfection', desc: '10 spares in a row', check: s => (s.bestSpareStreak || 0) >= 10 },
+  { id: 'total_throws_5k', name: 'Marathon Bowler', desc: '5000 total throws', check: s => s.totalThrows >= 5000 },
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -430,6 +459,10 @@ export class BowlingSystem extends createSystem({
   private currentOilPattern!: OilPattern;
   private sweepPending = false;
   private trailTimer = 0;
+  private pinWobble!: PinWobble;
+  private ballReturn!: BallReturn;
+  private scoringMonitor!: ScoringMonitor;
+  private pinGlow!: PinGlow;
 
   // Screen shake
   private shakeIntensity = 0;
@@ -449,6 +482,13 @@ export class BowlingSystem extends createSystem({
   // Pattern/theme tracking
   private patternsUsed: Set<number> = new Set();
   private themesUsed: Set<number> = new Set();
+
+  // New tracking (round 5)
+  private isBrooklyn = false;
+  private isWashout = false;
+  private gameThrowsNoGutter = 0;
+  private tenPinStandingAlone = false;
+  private frameResults: { frame: number; marks: string[]; pinsHit: number; wasStrike: boolean; wasSpare: boolean }[] = [];
 
   /** Access keyboard via the runtime InputManager (not exposed in types) */
   private _kb(): KeyboardLike {
@@ -489,6 +529,12 @@ export class BowlingSystem extends createSystem({
     // Oil pattern
     this.currentOilPattern = OIL_PATTERNS[this.career.oilPattern] || OIL_PATTERNS[0];
     this.oilVisual = new OilPatternVisual(this.world.scene, LANE_W);
+
+    // New effects (round 5)
+    this.pinWobble = new PinWobble();
+    this.ballReturn = new BallReturn(this.world.scene);
+    this.scoringMonitor = new ScoringMonitor(this.world.scene);
+    this.pinGlow = new PinGlow();
 
     this.bindPanels();
   }
@@ -708,7 +754,7 @@ export class BowlingSystem extends createSystem({
       this.achPage = 0;
       this.updateAchievementsPanel(doc);
       this.clickHandler(doc, 'btn-prev', () => { if (this.achPage > 0) { this.achPage--; this.updateAchievementsPanel(doc); } });
-      this.clickHandler(doc, 'btn-next', () => { if (this.achPage < 4) { this.achPage++; this.updateAchievementsPanel(doc); } });
+      this.clickHandler(doc, 'btn-next', () => { if (this.achPage < 5) { this.achPage++; this.updateAchievementsPanel(doc); } });
       this.clickHandler(doc, 'btn-back', () => this.showPanel('title'));
     });
 
@@ -946,6 +992,11 @@ export class BowlingSystem extends createSystem({
     this.gameSplits = 0;
     this.splitDetected = false;
     this.splitName = '';
+    this.isBrooklyn = false;
+    this.isWashout = false;
+    this.gameThrowsNoGutter = 0;
+    this.tenPinStandingAlone = false;
+    this.frameResults = [];
 
     // Track pattern/theme usage
     this.patternsUsed.add(this.career.oilPattern);
@@ -1055,8 +1106,12 @@ export class BowlingSystem extends createSystem({
     this.ballTrail.update(dt);
     this.pinSweep.update(dt);
     this.themeManager.update(dt);
+    this.scoringMonitor.update(dt);
+    this.ballReturn.update(dt);
+    this.pinWobble.update(dt, this.pinMeshes, this.pinStanding);
     const isAiming = this.state === GameState.AIMING || this.state === GameState.CHARGING;
     this.floorArrows.update(dt, isAiming);
+    this.pinGlow.update(dt, this.pinMeshes, this.pinStanding, isAiming);
 
     switch (this.state) {
       case GameState.COUNTDOWN:
@@ -1287,6 +1342,9 @@ export class BowlingSystem extends createSystem({
       if (dist < hitRadius) {
         this.knockPin(i, dx, dz);
         hitCount++;
+      } else if (dist < hitRadius * 1.6) {
+        // Near-miss: wobble the pin
+        this.pinWobble.startWobble(i, 1 - (dist - hitRadius) / (hitRadius * 0.6), dx, dz);
       }
     }
 
@@ -1475,6 +1533,21 @@ export class BowlingSystem extends createSystem({
     const isSpare = this.throwNum === 2 && totalPinsDown === 10;
     const isFrame10 = this.frame === 10;
 
+    // Track gutters for new stats
+    if (!this.ballInGutter) {
+      this.gameThrowsNoGutter++;
+    } else {
+      this.career.totalGutters = (this.career.totalGutters || 0) + 1;
+    }
+
+    // Detect brooklyn on strikes (ball hit right of center for head pin)
+    if (isStrike && this.throwNum === 1) {
+      if (this.ballX > 0.04) {
+        this.isBrooklyn = true;
+        this.career.brooklyns = (this.career.brooklyns || 0) + 1;
+      }
+    }
+
     // Record marks
     if (isStrike) {
       this.frameMarks[this.frame - 1].push('X');
@@ -1489,30 +1562,56 @@ export class BowlingSystem extends createSystem({
       this.triggerShake(0.06, 0.4);
       this.triggerHaptic(1.0, 200);
       sfxStrike();
-      if (this.currentStreak >= 5) {
-        this.showToast(this.currentStreak + 'x STREAK!');
-      } else if (this.currentStreak >= 3) {
-        this.showToast('TURKEY!');
-      } else {
-        this.showToast('STRIKE!');
-      }
+      const streakMsg = this.isBrooklyn
+        ? 'BROOKLYN STRIKE!'
+        : getStreakName(this.currentStreak);
+      this.showToast(streakMsg);
+      this.isBrooklyn = false;
+
+      // Track frame result
+      this.frameResults.push({
+        frame: this.frame,
+        marks: ['X'],
+        pinsHit: 10,
+        wasStrike: true,
+        wasSpare: false,
+      });
     } else if (isSpare) {
       this.frameMarks[this.frame - 1].push('/');
       this.gameSpares++;
       this.spareStreak++;
+      if (this.spareStreak > (this.career.bestSpareStreak || 0)) {
+        this.career.bestSpareStreak = this.spareStreak;
+      }
       this.currentStreak = 0;
       this.particles.emitSpare(new Vector3(0, 0.5, PIN_ZONE_Z));
       this.triggerShake(0.03, 0.25);
       this.triggerHaptic(0.6, 150);
       sfxSpare();
-      if (this.splitDetected) {
+
+      // Check for washout conversion
+      if (this.isWashout) {
+        this.career.washouts = (this.career.washouts || 0) + 1;
+        this.showToast('WASHOUT CONVERTED!');
+      } else if (this.splitDetected) {
         this.career.splitConversions++;
         this.showToast('SPLIT CONVERTED!');
+      } else if (this.tenPinStandingAlone) {
+        this.showToast('10-PIN SPARE!');
       } else {
         this.showToast('SPARE!');
       }
       this.splitDetected = false;
-      this.splitDetected = false;
+      this.isWashout = false;
+      this.tenPinStandingAlone = false;
+
+      this.frameResults.push({
+        frame: this.frame,
+        marks: [...this.frameMarks[this.frame - 1]],
+        pinsHit: totalPinsDown,
+        wasStrike: false,
+        wasSpare: true,
+      });
     } else {
       if (this.throwNum >= 2 && totalPinsDown < 10) {
         this.gameAllSpares = false;
@@ -1520,10 +1619,12 @@ export class BowlingSystem extends createSystem({
       if (pinsThisThrow === 0) {
         this.frameMarks[this.frame - 1].push('-');
         this.currentStreak = 0;
+        this.spareStreak = 0;
         this.triggerHaptic(0.15, 50);
       } else {
         this.frameMarks[this.frame - 1].push('' + pinsThisThrow);
         this.currentStreak = 0;
+        this.spareStreak = 0;
         this.triggerHaptic(0.3, 80);
       }
 
@@ -1537,6 +1638,29 @@ export class BowlingSystem extends createSystem({
           this.showToast(split);
           playTone(200, 0.3, 0.1, 'sawtooth'); // ominous split sound
         }
+
+        // Detect washout
+        if (detectWashout(this.pinStanding)) {
+          this.isWashout = true;
+          if (!split) this.showToast('WASHOUT!');
+        }
+
+        // Check for lone 10-pin
+        const standingCount = this.pinStanding.filter(s => s).length;
+        if (standingCount === 1 && this.pinStanding[9]) {
+          this.tenPinStandingAlone = true;
+        }
+      }
+
+      // Record frame result on second throw or end
+      if (this.throwNum >= 2) {
+        this.frameResults.push({
+          frame: this.frame,
+          marks: [...this.frameMarks[this.frame - 1]],
+          pinsHit: totalPinsDown,
+          wasStrike: false,
+          wasSpare: false,
+        });
       }
     }
 
@@ -1717,6 +1841,18 @@ export class BowlingSystem extends createSystem({
       this.career.perfectGames++;
     }
 
+    // Track clean game (no open frames)
+    let isClean = this.frame >= 10;
+    if (isClean) {
+      for (let f = 0; f < 10; f++) {
+        const marks = this.frameMarks[f];
+        const hasStrike = marks.includes('X');
+        const hasSpare = marks.includes('/');
+        if (!hasStrike && !hasSpare) { isClean = false; break; }
+      }
+      if (isClean) this.career.cleanGames = (this.career.cleanGames || 0) + 1;
+    }
+
     // XP and level
     this.career.xp += finalScore;
     const newLevel = Math.floor(this.career.xp / 500) + 1;
@@ -1754,12 +1890,19 @@ export class BowlingSystem extends createSystem({
       this.setText(d, 'strikes-count', '' + this.gameStrikes);
       this.setText(d, 'spares-count', '' + this.gameSpares);
       this.setText(d, 'gutters-count', '' + this.gameGutters);
+      this.setText(d, 'splits-count', '' + this.gameSplits);
       this.setText(d, 'throws-count', 'Throws: ' + this.throws.length);
       const totalPins = this.throws.reduce((a, b) => a + b, 0);
       const avg = this.throws.length > 0 ? (totalPins / this.throws.length).toFixed(1) : '0.0';
       this.setText(d, 'avg-pins', 'Avg: ' + avg + ' pins/throw');
       this.setText(d, 'streak-display', 'Best Run: ' + this.currentStreak);
       this.setText(d, 'xp-gained', '+' + finalScore + ' XP');
+
+      // Frame summary line (compact marks per frame)
+      const frameSummary = this.frameMarks
+        .map((marks, i) => (i + 1) + ':' + (marks.join('') || '-'))
+        .join(' ');
+      this.setText(d, 'frame-summary', frameSummary);
 
       // New best indicator
       if (finalScore >= this.career.bestScore && finalScore > 0) {
@@ -1847,6 +1990,12 @@ export class BowlingSystem extends createSystem({
           }
         }
         unlocked = allMarked;
+      } else if (ach.id === 'washout') {
+        unlocked = (this.career.washouts || 0) >= 1 && this.isWashout;
+      } else if (ach.id === 'gutter_free_50') {
+        unlocked = this.gameThrowsNoGutter >= 50;
+      } else if (ach.id === 'ten_pin_spare') {
+        unlocked = this.tenPinStandingAlone && this.gameSpares > 0;
       } else if (ach.id === 'first_spare_no_guide') {
         // 7-10 split spare: check if frame had pins 7 and 10 standing alone
         unlocked = false; // complex - skip for now
@@ -1887,9 +2036,15 @@ export class BowlingSystem extends createSystem({
     // Combo text with color
     let combo = ' ';
     let comboColor = '#ff00ff';
-    if (this.currentStreak >= 5) { combo = this.currentStreak + 'x STREAK!'; comboColor = '#ffcc00'; }
-    else if (this.currentStreak >= 3) { combo = 'Turkey!'; comboColor = '#ff8800'; }
-    else if (this.currentStreak >= 2) { combo = 'Double!'; comboColor = '#ff00ff'; }
+    if (this.currentStreak >= 2) {
+      combo = getStreakName(this.currentStreak);
+      if (this.currentStreak >= 8) comboColor = '#ff0000';
+      else if (this.currentStreak >= 5) comboColor = '#ffcc00';
+      else if (this.currentStreak >= 3) comboColor = '#ff8800';
+    } else if (this.spareStreak >= 3) {
+      combo = this.spareStreak + 'x Spare Streak!';
+      comboColor = '#00ff88';
+    }
     this.setText(d, 'combo-label', combo);
     const comboEl = d.getElementById('combo-label') as UIKit.Text | undefined;
     if (comboEl) comboEl.setProperties({ color: comboColor });
@@ -2009,7 +2164,7 @@ export class BowlingSystem extends createSystem({
     const unlocked = this.career.unlockedAchievements;
 
     this.setText(doc, 'ach-count', unlocked.length + ' / ' + ACHIEVEMENTS.length + ' unlocked');
-    this.setText(doc, 'page-label', (this.achPage + 1) + '/5');
+    this.setText(doc, 'page-label', (this.achPage + 1) + '/6');
 
     for (let i = 0; i < perPage; i++) {
       const achIdx = start + i;
@@ -2047,6 +2202,10 @@ export class BowlingSystem extends createSystem({
     this.setText(doc, 'stat-streak', '' + s.bestStreak);
     this.setText(doc, 'stat-level', s.level + ' - ' + this.getLevelName());
     this.setText(doc, 'stat-ach-count', s.unlockedAchievements.length + '/' + ACHIEVEMENTS.length);
+    this.setText(doc, 'stat-clean', '' + (s.cleanGames || 0));
+    this.setText(doc, 'stat-brooklyns', '' + (s.brooklyns || 0));
+    this.setText(doc, 'stat-splits', '' + (s.splitConversions || 0));
+    this.setText(doc, 'stat-gutters', '' + (s.totalGutters || 0));
   }
 
   private updateSettingsPanel(doc: UIKitDocument) {

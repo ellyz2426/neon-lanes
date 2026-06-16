@@ -637,6 +637,55 @@ export function getPinDiagram(standing: boolean[]): string {
 // Oil Pattern Visualizer
 // ══════════════════════════════════════════════════════════════
 
+// ══════════════════════════════════════════════════════════════
+// Streak Names
+// ══════════════════════════════════════════════════════════════
+
+export function getStreakName(streak: number): string {
+  if (streak >= 12) return 'PERFECT GAME!';
+  if (streak >= 10) return streak + 'x UNSTOPPABLE!';
+  if (streak >= 8) return 'Eight Bagger!';
+  if (streak >= 7) return 'Seven Bagger!';
+  if (streak >= 6) return 'Six Pack!';
+  if (streak >= 5) return 'Five Bagger!';
+  if (streak >= 4) return 'Four Bagger!';
+  if (streak >= 3) return 'Turkey!';
+  if (streak >= 2) return 'Double!';
+  return 'STRIKE!';
+}
+
+// ══════════════════════════════════════════════════════════════
+// Brooklyn Detection (ball hits opposite side of head pin)
+// ══════════════════════════════════════════════════════════════
+
+export function detectBrooklyn(ballX: number, pinsKnocked: boolean[], prevStanding: boolean[]): boolean {
+  // Brooklyn = strike or hit from the "wrong side" of the head pin
+  // For right-handed: ball hits left of head pin (negative x)
+  // Simplified: if head pin is hit and ball is on the opposite side
+  if (!prevStanding[0] || pinsKnocked[0]) return false; // head pin wasn't in play or wasn't hit
+  if (prevStanding[0] && !pinsKnocked[0]) return false; // head pin not hit this throw
+
+  // Head pin is at x=0; Brooklyn is when ball enters from the "wrong" side
+  return Math.abs(ballX) > 0.03 && ballX > 0.03; // ball hit right side = Brooklyn for standard
+}
+
+// ══════════════════════════════════════════════════════════════
+// Washout Detection (head pin down, leave pins on both sides)
+// ══════════════════════════════════════════════════════════════
+
+export function detectWashout(pinStanding: boolean[]): boolean {
+  // Washout: head pin is down but pins remain on both sides
+  if (pinStanding[0]) return false; // head pin must be down
+
+  const leftPins = [3, 6, 7]; // pins 4,7,8
+  const rightPins = [5, 8, 9]; // pins 6,9,10
+
+  const hasLeft = leftPins.some(i => pinStanding[i]);
+  const hasRight = rightPins.some(i => pinStanding[i]);
+
+  return hasLeft && hasRight;
+}
+
 export class OilPatternVisual {
   private mesh: Mesh;
   private visible = false;
@@ -669,6 +718,241 @@ export class OilPatternVisual {
 
   hide() {
     this.mesh.visible = false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Pin Wobble Effect (near-miss)
+// ══════════════════════════════════════════════════════════════
+
+export class PinWobble {
+  private wobbles: Map<number, { time: number; amplitude: number; axis: Vector3 }> = new Map();
+
+  startWobble(pinIndex: number, intensity = 1.0, dx = 0, dz = 1) {
+    const len = Math.sqrt(dx * dx + dz * dz) || 1;
+    this.wobbles.set(pinIndex, {
+      time: 0,
+      amplitude: 0.08 * intensity,
+      axis: new Vector3(dx / len, 0, dz / len),
+    });
+  }
+
+  update(dt: number, pinMeshes: any[], pinStanding: boolean[]) {
+    for (const [idx, w] of this.wobbles) {
+      if (!pinStanding[idx]) {
+        this.wobbles.delete(idx);
+        continue;
+      }
+      w.time += dt;
+      const decay = Math.exp(-w.time * 6);
+      const angle = Math.sin(w.time * 20) * w.amplitude * decay;
+      const m = pinMeshes[idx];
+      if (m) {
+        m.rotation.x = w.axis.z * angle;
+        m.rotation.z = -w.axis.x * angle;
+      }
+      if (decay < 0.01) {
+        if (m) { m.rotation.x = 0; m.rotation.z = 0; }
+        this.wobbles.delete(idx);
+      }
+    }
+  }
+
+  clear() { this.wobbles.clear(); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Ball Return Machine
+// ══════════════════════════════════════════════════════════════
+
+export class BallReturn {
+  private group: Group;
+  private ballMesh: Mesh | null = null;
+  private active = false;
+  private progress = 0;
+  private callback: (() => void) | null = null;
+  private returnColor = 0x00ffff;
+
+  constructor(parent: Object3D) {
+    this.group = new Group();
+
+    // Machine body at approach area
+    const bodyMat = new MeshStandardMaterial({
+      color: 0x111122,
+      emissive: 0x001133,
+      emissiveIntensity: 0.3,
+    });
+
+    // Main housing
+    const housing = new Mesh(new BoxGeometry(0.5, 0.3, 0.4), bodyMat);
+    housing.position.set(0.7, 0.15, 0.8);
+    this.group.add(housing);
+
+    // Top ramp
+    const ramp = new Mesh(
+      new BoxGeometry(0.4, 0.02, 0.35),
+      new MeshStandardMaterial({
+        color: 0x0a0a0a,
+        emissive: 0x002244,
+        emissiveIntensity: 0.15,
+      }),
+    );
+    ramp.position.set(0.7, 0.31, 0.8);
+    this.group.add(ramp);
+
+    // Status light
+    const light = new Mesh(
+      new SphereGeometry(0.025, 8, 8),
+      new MeshBasicMaterial({ color: 0x00ff44 }),
+    );
+    light.position.set(0.7, 0.35, 0.65);
+    this.group.add(light);
+
+    parent.add(this.group);
+  }
+
+  startReturn(ballColor: number, onComplete: () => void) {
+    this.active = true;
+    this.progress = 0;
+    this.returnColor = ballColor;
+    this.callback = onComplete;
+
+    // Create a small ball for the return animation
+    if (this.ballMesh) this.group.remove(this.ballMesh);
+    this.ballMesh = new Mesh(
+      new SphereGeometry(0.08, 8, 8),
+      new MeshBasicMaterial({ color: ballColor }),
+    );
+    this.ballMesh.position.set(0.7, 0.35, 0.6);
+    this.ballMesh.visible = false;
+    this.group.add(this.ballMesh);
+  }
+
+  update(dt: number) {
+    if (!this.active || !this.ballMesh) return;
+
+    this.progress += dt * 1.5;
+
+    if (this.progress < 0.3) {
+      // Wait phase (ball in machine)
+      this.ballMesh.visible = false;
+    } else if (this.progress < 1.0) {
+      // Ball emerges and rolls to center
+      this.ballMesh.visible = true;
+      const t = (this.progress - 0.3) / 0.7;
+      const x = 0.7 * (1 - t);
+      this.ballMesh.position.set(x, 0.35 - t * 0.24, 0.8);
+      this.ballMesh.rotation.z -= dt * 8;
+    } else {
+      // Done
+      this.active = false;
+      this.ballMesh.visible = false;
+      if (this.callback) this.callback();
+    }
+  }
+
+  isActive(): boolean { return this.active; }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Scoring Monitor (decorative electronic display above lane)
+// ══════════════════════════════════════════════════════════════
+
+export class ScoringMonitor {
+  private group: Group;
+  private screenMesh: Mesh;
+  private screenMat: MeshStandardMaterial;
+  private pulseTime = 0;
+
+  constructor(parent: Object3D) {
+    this.group = new Group();
+
+    // Monitor housing
+    const housingMat = new MeshStandardMaterial({
+      color: 0x0a0a0a,
+      emissive: 0x001122,
+      emissiveIntensity: 0.1,
+    });
+    const housing = new Mesh(new BoxGeometry(1.6, 0.6, 0.08), housingMat);
+    housing.position.set(0, 3.5, -8);
+    this.group.add(housing);
+
+    // Screen (glowing)
+    this.screenMat = new MeshStandardMaterial({
+      color: 0x001122,
+      emissive: 0x003366,
+      emissiveIntensity: 0.5,
+    });
+    this.screenMesh = new Mesh(new PlaneGeometry(1.4, 0.45), this.screenMat);
+    this.screenMesh.position.set(0, 3.5, -7.955);
+    this.group.add(this.screenMesh);
+
+    // Mount arm
+    const arm = new Mesh(
+      new CylinderGeometry(0.02, 0.02, 0.5, 6),
+      housingMat,
+    );
+    arm.position.set(0, 3.8, -8);
+    this.group.add(arm);
+
+    // Second monitor (higher, angled)
+    const housing2 = new Mesh(new BoxGeometry(1.2, 0.4, 0.06), housingMat);
+    housing2.position.set(0, 3.7, -4);
+    housing2.rotation.x = -0.15;
+    this.group.add(housing2);
+
+    const screen2 = new Mesh(
+      new PlaneGeometry(1.05, 0.3),
+      new MeshStandardMaterial({
+        color: 0x001122,
+        emissive: 0x002244,
+        emissiveIntensity: 0.35,
+      }),
+    );
+    screen2.position.set(0, 3.7, -3.965);
+    screen2.rotation.x = -0.15;
+    this.group.add(screen2);
+
+    parent.add(this.group);
+  }
+
+  update(dt: number) {
+    this.pulseTime += dt;
+    const pulse = Math.sin(this.pulseTime * 0.8) * 0.1 + 0.5;
+    this.screenMat.emissiveIntensity = pulse;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Pin Glow (subtle pulse on standing pins during aiming)
+// ══════════════════════════════════════════════════════════════
+
+export class PinGlow {
+  private time = 0;
+  private originalEmissive = 0.15;
+
+  update(dt: number, pinMeshes: any[], pinStanding: boolean[], isAiming: boolean) {
+    if (!isAiming) {
+      // Reset emissive to default
+      for (let i = 0; i < pinMeshes.length; i++) {
+        if (!pinStanding[i]) continue;
+        const body = pinMeshes[i]?.children?.[0];
+        if (body?.material) {
+          body.material.emissiveIntensity = this.originalEmissive;
+        }
+      }
+      return;
+    }
+    this.time += dt;
+    for (let i = 0; i < pinMeshes.length; i++) {
+      if (!pinStanding[i]) continue;
+      const body = pinMeshes[i]?.children?.[0];
+      if (body?.material) {
+        const phase = this.time * 2 + i * 0.3;
+        const pulse = Math.sin(phase) * 0.08 + this.originalEmissive + 0.05;
+        body.material.emissiveIntensity = pulse;
+      }
+    }
   }
 }
 
