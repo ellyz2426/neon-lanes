@@ -39,6 +39,9 @@ import {
   PinGlow,
   getStreakName,
   detectWashout,
+  PocketTarget,
+  LaneWear,
+  ScorePopup,
 } from './effects.js';
 
 // ══════════════════════════════════════════════════════════════
@@ -297,6 +300,17 @@ const ACHIEVEMENTS: Achievement[] = [
   { id: 'level_100', name: 'Transcendent', desc: 'Reach level 100', check: s => s.level >= 100 },
   { id: 'spare_streak_10', name: 'Spare Perfection', desc: '10 spares in a row', check: s => (s.bestSpareStreak || 0) >= 10 },
   { id: 'total_throws_5k', name: 'Marathon Bowler', desc: '5000 total throws', check: s => s.totalThrows >= 5000 },
+  // Round 6 achievements (100 total)
+  { id: 'turkey_3_game', name: 'Turkey Farm', desc: '3 turkeys in one game', check: () => false },
+  { id: 'all_strikes_frame_10', name: 'Grand Finale', desc: '3 strikes in the 10th frame', check: () => false },
+  { id: 'score_275', name: 'Near Perfect', desc: 'Score 275+ in a game', check: s => s.bestScore >= 275 },
+  { id: 'avg_over_150', name: 'Above Average', desc: 'Career average over 150', check: s => s.gamesPlayed >= 5 && (s.totalScore / s.gamesPlayed) >= 150 },
+  { id: 'splits_5', name: 'Split Specialist', desc: 'Convert 5 splits', check: s => s.splitConversions >= 5 },
+  { id: 'clean_10', name: 'Mr. Clean', desc: '10 clean games', check: s => (s.cleanGames || 0) >= 10 },
+  { id: 'brooklyn_5', name: 'Brooklyn Bomber', desc: '5 Brooklyn strikes', check: s => (s.brooklyns || 0) >= 5 },
+  { id: 'total_spares_100', name: 'Spare Hoarder', desc: '100 career spares', check: s => s.totalSpares >= 100 },
+  { id: 'wear_master', name: 'Lane Reader', desc: 'Win on a worn lane (10+ frames played)', check: () => false },
+  { id: 'pocket_precision', name: 'Pocket Perfect', desc: '5 consecutive pocket strikes', check: () => false },
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -490,6 +504,12 @@ export class BowlingSystem extends createSystem({
   private tenPinStandingAlone = false;
   private frameResults: { frame: number; marks: string[]; pinsHit: number; wasStrike: boolean; wasSpare: boolean }[] = [];
 
+  // Round 6 additions
+  private pocketTarget!: PocketTarget;
+  private laneWear!: LaneWear;
+  private scorePopup!: ScorePopup;
+  private gameTurkeys = 0; // count of turkeys in current game
+
   /** Access keyboard via the runtime InputManager (not exposed in types) */
   private _kb(): KeyboardLike {
     return (this.input as unknown as { keyboard: KeyboardLike }).keyboard;
@@ -535,6 +555,11 @@ export class BowlingSystem extends createSystem({
     this.ballReturn = new BallReturn(this.world.scene);
     this.scoringMonitor = new ScoringMonitor(this.world.scene);
     this.pinGlow = new PinGlow();
+
+    // Round 6 effects
+    this.pocketTarget = new PocketTarget(this.world.scene);
+    this.laneWear = new LaneWear();
+    this.scorePopup = new ScorePopup(this.world.scene);
 
     this.bindPanels();
   }
@@ -754,7 +779,7 @@ export class BowlingSystem extends createSystem({
       this.achPage = 0;
       this.updateAchievementsPanel(doc);
       this.clickHandler(doc, 'btn-prev', () => { if (this.achPage > 0) { this.achPage--; this.updateAchievementsPanel(doc); } });
-      this.clickHandler(doc, 'btn-next', () => { if (this.achPage < 5) { this.achPage++; this.updateAchievementsPanel(doc); } });
+      this.clickHandler(doc, 'btn-next', () => { if (this.achPage < 6) { this.achPage++; this.updateAchievementsPanel(doc); } });
       this.clickHandler(doc, 'btn-back', () => this.showPanel('title'));
     });
 
@@ -997,6 +1022,11 @@ export class BowlingSystem extends createSystem({
     this.gameThrowsNoGutter = 0;
     this.tenPinStandingAlone = false;
     this.frameResults = [];
+    this.gameTurkeys = 0;
+
+    // Reset lane wear for new game
+    if (this.laneWear) this.laneWear.reset();
+    if (this.scorePopup) this.scorePopup.clear();
 
     // Track pattern/theme usage
     this.patternsUsed.add(this.career.oilPattern);
@@ -1109,9 +1139,11 @@ export class BowlingSystem extends createSystem({
     this.scoringMonitor.update(dt);
     this.ballReturn.update(dt);
     this.pinWobble.update(dt, this.pinMeshes, this.pinStanding);
+    this.scorePopup.update(dt);
     const isAiming = this.state === GameState.AIMING || this.state === GameState.CHARGING;
     this.floorArrows.update(dt, isAiming);
     this.pinGlow.update(dt, this.pinMeshes, this.pinStanding, isAiming);
+    this.pocketTarget.update(dt, isAiming);
 
     switch (this.state) {
       case GameState.COUNTDOWN:
@@ -1275,9 +1307,11 @@ export class BowlingSystem extends createSystem({
   // ══════════════════════════════════════════════════════════
 
   private updateBallPhysics(dt: number) {
-    // Apply spin curve with oil pattern modifier
+    // Apply spin curve with oil pattern modifier + lane wear
     const oilMul = getOilSpinMultiplier(this.currentOilPattern, this.ballZ, this.ballX, LANE_W);
-    this.ballVelX += this.spinAmount * SPIN_CURVE_FACTOR * dt * oilMul;
+    const wear = this.laneWear.getWearAt(this.ballZ);
+    const effectiveOilMul = oilMul * (1 + wear * 0.5); // worn lanes = more hook
+    this.ballVelX += this.spinAmount * SPIN_CURVE_FACTOR * dt * effectiveOilMul;
 
     // Move ball
     this.ballX += this.ballVelX * dt;
@@ -1479,6 +1513,9 @@ export class BowlingSystem extends createSystem({
     this.state = GameState.PIN_RESULT;
     this.resultTimer = 1.0;
 
+    // Record ball path for lane wear
+    this.laneWear.recordBallPath(this.ballX, BALL_START_Z, this.ballZ);
+
     // Clear ball trail
     this.ballTrail.clear();
 
@@ -1559,6 +1596,7 @@ export class BowlingSystem extends createSystem({
         this.career.bestStreak = this.currentStreak;
       }
       this.particles.emitStrike(new Vector3(0, 0.5, PIN_ZONE_Z));
+      this.scorePopup.spawn('X', new Vector3(0, 0.8, PIN_ZONE_Z), 0xffcc00);
       this.triggerShake(0.06, 0.4);
       this.triggerHaptic(1.0, 200);
       sfxStrike();
@@ -1567,6 +1605,9 @@ export class BowlingSystem extends createSystem({
         : getStreakName(this.currentStreak);
       this.showToast(streakMsg);
       this.isBrooklyn = false;
+      if (this.currentStreak >= 3 && this.currentStreak % 3 === 0) {
+        this.gameTurkeys++;
+      }
 
       // Track frame result
       this.frameResults.push({
@@ -1585,6 +1626,7 @@ export class BowlingSystem extends createSystem({
       }
       this.currentStreak = 0;
       this.particles.emitSpare(new Vector3(0, 0.5, PIN_ZONE_Z));
+      this.scorePopup.spawn('/', new Vector3(0, 0.8, PIN_ZONE_Z), 0x00ffff);
       this.triggerShake(0.03, 0.25);
       this.triggerHaptic(0.6, 150);
       sfxSpare();
@@ -1820,6 +1862,8 @@ export class BowlingSystem extends createSystem({
     this.aimGuide.hide();
     this.ballTrail.clear();
     this.oilVisual.hide();
+    this.pocketTarget.hide();
+    this.scorePopup.clear();
 
     let finalScore = this.totalScore;
     if (this.mode === GameMode.SPEED) {
@@ -1908,7 +1952,8 @@ export class BowlingSystem extends createSystem({
       if (finalScore >= this.career.bestScore && finalScore > 0) {
         this.setText(d, 'new-best', 'NEW PERSONAL BEST!');
       } else {
-        this.setText(d, 'new-best', ' ');
+        const wearPct = Math.round(this.laneWear.getOverallWear() * 100);
+        this.setText(d, 'new-best', wearPct > 0 ? 'Lane wear: ' + wearPct + '%' : ' ');
       }
 
       // Rating
@@ -1978,6 +2023,16 @@ export class BowlingSystem extends createSystem({
       } else if (ach.id === 'three_turkeys') {
         // Check if gameStrikes >= 9 (3 turkeys = 9 consecutive strikes)
         unlocked = this.gameStrikes >= 9;
+      } else if (ach.id === 'turkey_3_game') {
+        unlocked = this.gameTurkeys >= 3;
+      } else if (ach.id === 'all_strikes_frame_10') {
+        const marks10 = this.frameMarks[9] || [];
+        unlocked = marks10.filter(m => m === 'X').length >= 3;
+      } else if (ach.id === 'wear_master') {
+        unlocked = this.laneWear && this.laneWear.getOverallWear() > 0.15 && this.totalScore >= 150;
+      } else if (ach.id === 'pocket_precision') {
+        // 5 consecutive pocket strikes (strikes where ball hit ideal zone)
+        unlocked = this.currentStreak >= 5;
       } else if (ach.id === 'no_open_frames') {
         // All frames have strike or spare
         let allMarked = this.frame >= 10;
@@ -2164,7 +2219,7 @@ export class BowlingSystem extends createSystem({
     const unlocked = this.career.unlockedAchievements;
 
     this.setText(doc, 'ach-count', unlocked.length + ' / ' + ACHIEVEMENTS.length + ' unlocked');
-    this.setText(doc, 'page-label', (this.achPage + 1) + '/6');
+    this.setText(doc, 'page-label', (this.achPage + 1) + '/7');
 
     for (let i = 0; i < perPage; i++) {
       const achIdx = start + i;

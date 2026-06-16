@@ -957,6 +957,196 @@ export class PinGlow {
 }
 
 // ══════════════════════════════════════════════════════════════
+// Pocket Target Indicator (shows ideal hit zone on pin deck)
+// ══════════════════════════════════════════════════════════════
+
+export class PocketTarget {
+  private dots: Mesh[] = [];
+  private container: Group;
+  private time = 0;
+
+  constructor(parent: Object3D) {
+    this.container = new Group();
+    parent.add(this.container);
+
+    const dotGeo = new SphereGeometry(0.03, 8, 8);
+
+    // Main pocket target (between pins 1 and 3)
+    const mainDot = new Mesh(dotGeo, new MeshBasicMaterial({
+      color: 0xff8800,
+      transparent: true,
+      opacity: 0.4,
+      blending: AdditiveBlending,
+    }));
+    mainDot.position.set(0.08, 0.005, -16);
+    this.container.add(mainDot);
+    this.dots.push(mainDot);
+
+    // Secondary targets (ideal entry angles)
+    const secondaryPositions: [number, number][] = [
+      [0.05, -15.8],
+      [0.11, -16.15],
+    ];
+    for (const [x, z] of secondaryPositions) {
+      const dot = new Mesh(
+        new SphereGeometry(0.02, 6, 6),
+        new MeshBasicMaterial({
+          color: 0xffaa44,
+          transparent: true,
+          opacity: 0.25,
+          blending: AdditiveBlending,
+        }),
+      );
+      dot.position.set(x, 0.005, z);
+      this.container.add(dot);
+      this.dots.push(dot);
+    }
+
+    // Ring around main target
+    const ringGeo = new CylinderGeometry(0.06, 0.06, 0.003, 16, 1, true);
+    const ring = new Mesh(ringGeo, new MeshBasicMaterial({
+      color: 0xff8800,
+      transparent: true,
+      opacity: 0.2,
+      blending: AdditiveBlending,
+      side: DoubleSide,
+    }));
+    ring.position.set(0.08, 0.006, -16);
+    this.container.add(ring);
+    this.dots.push(ring);
+
+    this.container.visible = false;
+  }
+
+  show() { this.container.visible = true; }
+  hide() { this.container.visible = false; }
+
+  update(dt: number, isAiming: boolean) {
+    if (!isAiming) {
+      this.container.visible = false;
+      return;
+    }
+    this.container.visible = true;
+    this.time += dt;
+
+    // Pulse the main target
+    const pulse = Math.sin(this.time * 3) * 0.15 + 0.4;
+    if (this.dots[0]?.material) {
+      (this.dots[0].material as MeshBasicMaterial).opacity = pulse;
+    }
+
+    // Rotate the ring
+    if (this.dots[3]) {
+      this.dots[3].rotation.y += dt * 0.8;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Lane Wear System (oil degrades over frames)
+// ══════════════════════════════════════════════════════════════
+
+export class LaneWear {
+  private wearMap: number[] = []; // 0-1 wear per zone (0=fresh, 1=fully worn)
+  private zones = 20; // number of lane zones
+  private laneLength = 18;
+
+  constructor() {
+    this.reset();
+  }
+
+  reset() {
+    this.wearMap = new Array(this.zones).fill(0);
+  }
+
+  /** Record ball path to increase wear along trajectory */
+  recordBallPath(ballX: number, startZ: number, endZ: number) {
+    for (let i = 0; i < this.zones; i++) {
+      const zoneZ = -(i / this.zones) * this.laneLength;
+      if (zoneZ < endZ || zoneZ > startZ) continue;
+      // More wear near center, less on edges
+      const centerness = 1 - Math.abs(ballX) / 0.55;
+      const wearAmount = Math.max(0, centerness) * 0.03;
+      this.wearMap[i] = Math.min(1, this.wearMap[i] + wearAmount);
+    }
+  }
+
+  /** Get effective oil reduction at a point (0 = no wear, 1 = fully dry) */
+  getWearAt(z: number): number {
+    const idx = Math.floor(Math.abs(z) / this.laneLength * this.zones);
+    if (idx < 0 || idx >= this.zones) return 0;
+    return this.wearMap[idx];
+  }
+
+  /** Get overall wear percentage */
+  getOverallWear(): number {
+    const total = this.wearMap.reduce((a, b) => a + b, 0);
+    return total / this.zones;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Score Pop-up (floating score text after each throw)
+// ══════════════════════════════════════════════════════════════
+
+export class ScorePopup {
+  private popups: { mesh: Mesh; velocity: number; life: number; maxLife: number }[] = [];
+  private container: Group;
+
+  constructor(parent: Object3D) {
+    this.container = new Group();
+    parent.add(this.container);
+  }
+
+  spawn(text: string, position: Vector3, color = 0x00ffff) {
+    // Create a simple colored sphere as a visual marker (PanelUI handles text)
+    // Instead, we use this to track the popup lifecycle
+    const geo = new SphereGeometry(0.04, 8, 8);
+    const mat = new MeshBasicMaterial({
+      color,
+      transparent: true,
+      opacity: 0.8,
+      blending: AdditiveBlending,
+    });
+    const mesh = new Mesh(geo, mat);
+    mesh.position.copy(position);
+    this.container.add(mesh);
+
+    this.popups.push({
+      mesh,
+      velocity: 1.5,
+      life: 1.5,
+      maxLife: 1.5,
+    });
+  }
+
+  update(dt: number) {
+    for (let i = this.popups.length - 1; i >= 0; i--) {
+      const p = this.popups[i];
+      p.life -= dt;
+      p.mesh.position.y += p.velocity * dt;
+      p.velocity *= 0.98; // slow down
+
+      const t = p.life / p.maxLife;
+      (p.mesh.material as MeshBasicMaterial).opacity = t * 0.8;
+      p.mesh.scale.setScalar(0.5 + t * 0.5);
+
+      if (p.life <= 0) {
+        this.container.remove(p.mesh);
+        this.popups.splice(i, 1);
+      }
+    }
+  }
+
+  clear() {
+    for (const p of this.popups) {
+      this.container.remove(p.mesh);
+    }
+    this.popups.length = 0;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
 // Animated Floor Arrows
 // ══════════════════════════════════════════════════════════════
 
